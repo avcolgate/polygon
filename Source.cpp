@@ -1,7 +1,7 @@
 ﻿#include "poly.h"
 
 int main() {
-    const std::string fileName = "large_1.txt";
+    const std::string fileName = "dff_coords.txt";
 
     Polygon polygon;
     
