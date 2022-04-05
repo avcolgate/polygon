@@ -8,15 +8,15 @@ std::string eLineOrientToStr(const LineOrientation& orient) {
     return "undefined";
 }
 
-std::string eOffsetTypeToStr(const OffsetType& type) {
+char eOffsetTypeToCh(const OffsetType& type) {
     if (type == OffsetType::in)
-        return "in";
+        return 'i';
     else if (type == OffsetType::out)
-        return "out";
+        return 'o';
     else if (type == OffsetType::edge)
-        return "edge";
+        return 'e';
 
-    return "undefined";
+    return 'u';
 }
 
 std::string offsetTypeToShort(const std::string type) {
@@ -264,8 +264,7 @@ void Polygon::FixOrderLines() {
 }
 
 void Polygon::findOffsets() {
-    //Offset tempOffset;
-    std::string   tempOffsetType;
+    char         tempOffsetType;
     int32_t      tempOffsetHeight;
     int32_t      tempOffsetWidth;
 
@@ -277,27 +276,27 @@ void Polygon::findOffsets() {
      
                 tempOffsetWidth = line[i].length;
                 tempOffsetHeight = (line[i].start.y);
-                std::cout << tempOffsetHeight << "\n";
+                //std::cout << tempOffsetHeight << "\n";
 
                 if (tempOffsetHeight == 0)
-                    tempOffsetType = eOffsetTypeToStr(OffsetType::edge);
+                    tempOffsetType = eOffsetTypeToCh(OffsetType::edge);
                 else if (tempOffsetHeight < 0)
-                    tempOffsetType = eOffsetTypeToStr(OffsetType::out);
+                    tempOffsetType = eOffsetTypeToCh(OffsetType::out);
                 else if (tempOffsetHeight > 0)
-                    tempOffsetType = eOffsetTypeToStr(OffsetType::in);
+                    tempOffsetType = eOffsetTypeToCh(OffsetType::in);
             }
             else {                                         //bottom
                
                 tempOffsetWidth = line[i].length;
                 tempOffsetHeight = (line[i].start.y - (max.y - min.y));
-                std::cout << tempOffsetHeight << "\n";
+                //std::cout << tempOffsetHeight << "\n";
 
                 if (tempOffsetHeight == 0)
-                    tempOffsetType = eOffsetTypeToStr(OffsetType::edge);
+                    tempOffsetType = eOffsetTypeToCh(OffsetType::edge);
                 else if (tempOffsetHeight > 0)
-                    tempOffsetType = eOffsetTypeToStr(OffsetType::out);
+                    tempOffsetType = eOffsetTypeToCh(OffsetType::out);
                 else if (tempOffsetHeight < 0)
-                    tempOffsetType = eOffsetTypeToStr(OffsetType::in);
+                    tempOffsetType = eOffsetTypeToCh(OffsetType::in);
             }
 
             offsetType.push_back(tempOffsetType);

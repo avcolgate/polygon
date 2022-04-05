@@ -51,12 +51,12 @@ public:
 
 class Polygon {
 public:
-    std::vector<Line> line;
-    //std::vector<Offset> offset;
-    std::vector<std::string>   offsetType;
-    std::vector<int32_t>      offsetHeight;
-    std::vector<int32_t>      offsetWidth;
+    std::vector<Line>          line;
+    std::vector<char>          offsetType;
+    std::vector<int32_t>       offsetHeight;
+    std::vector<int32_t>       offsetWidth;
     bool                       WidthOnTop;
+    std::string                strOffsetType;
   
     Point min, max;
 
@@ -74,8 +74,4 @@ public:
     void MakeCoordsRelative();
     void DeletingExtraLines();
     void FixOrderLines();
-};
-
-class Layout {
-    std::vector<Polygon> polygons;
 };
