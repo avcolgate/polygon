@@ -203,6 +203,7 @@ void Polygon::DeletingExtraLines() {
         }
     }
     line.erase(line.begin() + idx);
+    std::cout << "deleted " << idx << " line" << std::endl;
     idx--;
 
     //Deleting the previous
