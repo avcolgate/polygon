@@ -52,11 +52,10 @@ public:
 class Polygon {
 public:
     std::vector<Line>          line;
-    std::vector<char>          offsetType;
+    std::string                strOffsetType;
     std::vector<int32_t>       offsetHeight;
     std::vector<int32_t>       offsetWidth;
     bool                       WidthOnTop;
-    std::string                strOffsetType;
   
     Point min, max;
 
@@ -75,3 +74,5 @@ public:
     void DeletingExtraLines();
     void FixOrderLines();
 };
+
+void findWanted(const std::string toFind, const std::string big);

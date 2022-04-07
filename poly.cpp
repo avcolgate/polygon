@@ -8,15 +8,15 @@ std::string eLineOrientToStr(const LineOrientation& orient) {
     return "undefined";
 }
 
-char eOffsetTypeToCh(const OffsetType& type) {
+std::string eOffsetTypeToStr(const OffsetType& type) {
     if (type == OffsetType::in)
-        return 'i';
+        return "i";
     else if (type == OffsetType::out)
-        return 'o';
+        return "o";
     else if (type == OffsetType::edge)
-        return 'e';
+        return "e";
 
-    return 'u';
+    return "u";
 }
 
 std::string offsetTypeToShort(const std::string type) {
@@ -93,11 +93,11 @@ void Polygon::printOffsets() {
     string tempType;
     cout << "Offsets table:\n";
     cout << setw(13) << "Width" << setw(8) << "Height" << setw(8) << "Type\n";
-    for (size_t i = 0; i < offsetType.size(); i++) {
+    for (size_t i = 0; i < strOffsetType.size(); i++) {
         //tempType = eOffsetTypeToStr(offsetType[i].offsetType);
     
         cout << "(" << i << ")" << setw(9) << offsetWidth[i] << setw(8) << offsetHeight[i]
-            << setw(7) << offsetType[i] << "\n";
+            << setw(7) << strOffsetType[i] << "\n";
     }
     cout << "\n";
 }
@@ -264,9 +264,9 @@ void Polygon::FixOrderLines() {
 }
 
 void Polygon::findOffsets() {
-    char         tempOffsetType;
-    int32_t      tempOffsetHeight;
-    int32_t      tempOffsetWidth;
+    std::string    strTempOffsetType;
+    int32_t        tempOffsetHeight;
+    int32_t        tempOffsetWidth;
 
 
     for (size_t i = 0; i < line.size(); i++) {
@@ -279,11 +279,11 @@ void Polygon::findOffsets() {
                 //std::cout << tempOffsetHeight << "\n";
 
                 if (tempOffsetHeight == 0)
-                    tempOffsetType = eOffsetTypeToCh(OffsetType::edge);
+                    strTempOffsetType = eOffsetTypeToStr(OffsetType::edge);
                 else if (tempOffsetHeight < 0)
-                    tempOffsetType = eOffsetTypeToCh(OffsetType::out);
+                    strTempOffsetType = eOffsetTypeToStr(OffsetType::out);
                 else if (tempOffsetHeight > 0)
-                    tempOffsetType = eOffsetTypeToCh(OffsetType::in);
+                    strTempOffsetType = eOffsetTypeToStr(OffsetType::in);
             }
             else {                                         //bottom
                
@@ -292,14 +292,14 @@ void Polygon::findOffsets() {
                 //std::cout << tempOffsetHeight << "\n";
 
                 if (tempOffsetHeight == 0)
-                    tempOffsetType = eOffsetTypeToCh(OffsetType::edge);
+                    strTempOffsetType = eOffsetTypeToStr(OffsetType::edge);
                 else if (tempOffsetHeight > 0)
-                    tempOffsetType = eOffsetTypeToCh(OffsetType::out);
+                    strTempOffsetType = eOffsetTypeToStr(OffsetType::out);
                 else if (tempOffsetHeight < 0)
-                    tempOffsetType = eOffsetTypeToCh(OffsetType::in);
+                    strTempOffsetType = eOffsetTypeToStr(OffsetType::in);
             }
 
-            offsetType.push_back(tempOffsetType);
+            strOffsetType+=strTempOffsetType;
             offsetHeight.push_back(tempOffsetHeight);
             offsetWidth.push_back(tempOffsetWidth);
 

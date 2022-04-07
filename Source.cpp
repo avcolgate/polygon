@@ -1,86 +1,70 @@
 ﻿#include "poly.h"
 
 int main() {
-    const std::string wantedFileName = "txt/dff_coords.txt";
+    const std::string targetFileName = "txt/dff_coords.txt";
+    const std::string mainFileName = "txt/large_1.txt";
 
-    Polygon wanted_poly;
+    Polygon targetPoly;
+    Polygon mainPoly;
     
-    if (wanted_poly.readFile(wantedFileName) == true) {
-        std::cout << "File " << wantedFileName << " was successfully read!\n\n";
+    if (targetPoly.readFile(targetFileName)) {
+        std::cout << std::setw(55) << targetFileName << " was successfully read!\n";
     }
     else {
-        std::cout << "ERROR in opening file!";
+        std::cout << "ERROR in opening " << targetFileName << std::endl;
         return EXIT_FAILURE;
     }
 
-    //wanted_poly.printLines();
-    wanted_poly.calcLines();
-
-    wanted_poly.MakeCoordsRelative();
-    //wanted_poly.printLines();
-
-    wanted_poly.FixOrderLines();
-    //wanted_poly.printLines();
-
-    wanted_poly.DeletingExtraLines();
-    //wanted_poly.printLines();
-
-    wanted_poly.findOffsets();
-    //wanted_poly.printOffsets();
-
-    for (size_t i = 0; i < wanted_poly.offsetType.size(); i++) {
-        wanted_poly.strOffsetType = wanted_poly.strOffsetType + wanted_poly.offsetType.at(i);
+    if (mainPoly.readFile(mainFileName)) {
+        std::cout << std::setw(55) << mainFileName << " was successfully read!\n";
     }
-    std::cout << wanted_poly.strOffsetType << std::endl;
+    else {
+        std::cout << "ERROR in opening " << mainFileName << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    //for (size_t i = 0; i < wanted_poly.offsetType.size(); i++) {
-    //    std::cout << wanted_poly.offsetHeight.at(i) << " ";
-    //}
 
-    std::cout << "-------------------------------------------------------------------------------------------\n";
+    //targetPoly.printLines();
+    targetPoly.calcLines();
+
+    targetPoly.MakeCoordsRelative();
+    //targetPoly.printLines();
+
+    targetPoly.FixOrderLines();
+    //targetPoly.printLines();
+
+    targetPoly.DeletingExtraLines();
+    //targetPoly.printLines();
+
+    targetPoly.findOffsets();
+    //targetPoly.printOffsets();
+
+    std::cout << "Small poly: " << targetPoly.strOffsetType << std::endl;
+
+    std::cout << "##########################################################################################################\n";
+    std::cout << "##########################################################################################################\n";
     /*
         ОБРАБОТКА БОЛЬШОГО ПОЛИГОНА
     */
 
-    const std::string bigFileName = "txt/large_1.txt";
+    //mainPoly.printLines();
+    mainPoly.calcLines();
 
-    Polygon big_poly;
+    mainPoly.MakeCoordsRelative();
+    //mainPoly.printLines();
 
-    if (big_poly.readFile(bigFileName) == true) {
-        std::cout << "File " << bigFileName << " was successfully read!\n\n";
-    }
-    else {
-        std::cout << "ERROR in opening " << bigFileName << std::endl;
-        return EXIT_FAILURE;
-    }
+    mainPoly.FixOrderLines();
+    //mainPoly.printLines();
 
-    //big_poly.printLines();
-    big_poly.calcLines();
+    mainPoly.DeletingExtraLines();
+    //mainPoly.printLines();
 
-    big_poly.MakeCoordsRelative();
-    //big_poly.printLines();
+    mainPoly.findOffsets();
+    //mainPoly.printOffsets();
 
-    big_poly.FixOrderLines();
-    //big_poly.printLines();
+    std::cout << "Big poly: " << mainPoly.strOffsetType << std::endl;
 
-    big_poly.DeletingExtraLines();
-    //big_poly.printLines();
-
-    big_poly.findOffsets();
-    //big_poly.printOffsets();
-
-    for (size_t i = 0; i < big_poly.offsetType.size(); i++) {
-        big_poly.strOffsetType = big_poly.strOffsetType + big_poly.offsetType.at(i);
-    }
-    std::cout << big_poly.strOffsetType << std::endl;
-
-    //for (size_t i = 0; i < big_poly.offsetType.size(); i++) {
-    //    std::string tempstr = (big_poly.offsetType.at(i));
-    //    std::cout << tempstr.substr(0, 1);
-    //}
-    //std::cout << std::endl;
-
-
+    findWanted(targetPoly.strOffsetType, mainPoly.strOffsetType);
 
     return EXIT_SUCCESS;
 }
