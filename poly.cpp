@@ -19,17 +19,6 @@ std::string eOffsetTypeToStr(const OffsetType& type) {
     return "u";
 }
 
-std::string offsetTypeToShort(const std::string type) {
-    if (type == "in")
-        return "i";
-    else if (type == "out")
-        return "o";
-    else if (type == "edge")
-        return "e";
-
-    return "_";
-}
-
 bool Polygon::readFile(const std::string& fileName) {
 
     std::ifstream file;
@@ -40,7 +29,6 @@ bool Polygon::readFile(const std::string& fileName) {
     if (!file)
         return false;
   
-
     file >> tempLine.start.x >> tempLine.start.y;
 
     do {
@@ -48,7 +36,8 @@ bool Polygon::readFile(const std::string& fileName) {
             return false;
         file >> tempLine.finish.x >> tempLine.finish.y;
 
-        tempLen = abs(tempLine.finish.x - tempLine.start.x); //trying to get X length (vertical)
+        //calculating length and orientation
+        tempLen = abs(tempLine.finish.x - tempLine.start.x);
         if (tempLen == 0) {
             tempLen = abs(tempLine.finish.y - tempLine.start.y);
             tempLine.orient = LineOrientation::vertical;
@@ -56,16 +45,14 @@ bool Polygon::readFile(const std::string& fileName) {
         else {
             tempLine.orient = LineOrientation::horizontal;
         }
-
         tempLine.length = tempLen;
-
         line.push_back(tempLine);
 
         tempLine.start.x = tempLine.finish.x;
         tempLine.start.y = tempLine.finish.y;
 
     } while (!(tempLine.finish.x == line.at(0).start.x && tempLine.finish.y == line.at(0).start.y));
-
+    
     file.close();
     return true;
 }
@@ -94,8 +81,6 @@ void Polygon::printOffsets() {
     cout << "Offsets table:\n";
     cout << setw(13) << "Width" << setw(8) << "Height" << setw(8) << "Type\n";
     for (size_t i = 0; i < strOffsetType.size(); i++) {
-        //tempType = eOffsetTypeToStr(offsetType[i].offsetType);
-    
         cout << "(" << i << ")" << setw(9) << offsetWidth[i] << setw(8) << offsetHeight[i]
             << setw(7) << strOffsetType[i] << "\n";
     }
@@ -105,38 +90,40 @@ void Polygon::printOffsets() {
 void Polygon::calcLines() {
     size_t widthNum = 0, nextNum = 0, prevNum = 0;
 
-    //WIDTH & HEIGHT search
+    //calculating width
     for (size_t i = 0; i < line.size(); i++) {
         if (line[i].length > width && line[i].orient == LineOrientation::horizontal) {
             width = line[i].length;
             widthNum = i;
         }
+    }
             
-        if (widthNum == line.size() - 1) { //if last
-            prevNum = widthNum - 1;
-            nextNum = 0;
-        }
-        else if (widthNum == 0) {          //if first
-            prevNum = line.size() - 1;
-            nextNum = widthNum + 1;
-        }
-        else {
-            prevNum = widthNum - 1;
-            nextNum = widthNum + 1;
-        }
-
-        if (line[nextNum].length > line[prevNum].length)
-            height = line[nextNum].length;
-        else
-            height = line[prevNum].length;
+    if (widthNum == line.size() - 1) {
+        prevNum = widthNum - 1;
+        nextNum = 0;
+    }
+    else if (widthNum == 0) {
+        prevNum = line.size() - 1;
+        nextNum = widthNum + 1;
+    }
+    else {
+        prevNum = widthNum - 1;
+        nextNum = widthNum + 1;
     }
 
-    std::cout << "Width is line number " << widthNum << std::endl << "Width's length " << line[widthNum].length << std::endl;
+    //calculating height
+    if (line[nextNum].length > line[prevNum].length)
+        height = line[nextNum].length;
+    else
+        height = line[prevNum].length;
+    
+    /*
+    calculating min & max
+    */
 
-    //if width is above
+    //if width is on the top
     if (line[widthNum].finish.y > line[nextNum].finish.y) {
-        std::cout << "Width is on the top!" << std::endl;
-        WidthOnTop = true;
+        widthOnTop = true;
         //max
         if (line[widthNum].finish.x > line[widthNum].start.x) {
             max.x = line[widthNum].finish.x;
@@ -146,7 +133,7 @@ void Polygon::calcLines() {
             max.x = line[widthNum].start.x;
             max.y = line[widthNum].start.y;
         }
-        //min (x)
+        //min
         if (line[nextNum].finish.x < line[prevNum].start.x) {
             min.x = line[nextNum].finish.x;
             min.y = line[nextNum].finish.y;
@@ -156,10 +143,9 @@ void Polygon::calcLines() {
             min.y = line[prevNum].start.y;
         }
     }
-    //if width is below
+    //if width is on the bottom
     else {
-        std::cout << "Width is on the bottom!" << std::endl;
-        WidthOnTop = false;
+        widthOnTop = false;
         //max
         if (line[nextNum].finish.x > line[prevNum].start.x) {
             max.x = line[nextNum].finish.x;
@@ -169,7 +155,7 @@ void Polygon::calcLines() {
             max.x = line[prevNum].start.x;
             max.y = line[prevNum].start.y;
         }
-        //min (x)
+        //min
         if (line[widthNum].finish.x < line[widthNum].start.x) {
             min.x = line[widthNum].finish.x;
             min.y = line[widthNum].finish.y;
@@ -179,10 +165,19 @@ void Polygon::calcLines() {
             min.y = line[widthNum].start.y;
         }
     }
+
+#ifdef DEBUG
+    std::cout << "Width is line number " << widthNum << std::endl;
+    std::cout << "Width's length " << line[widthNum].length << std::endl;
+
+    if (widthOnTop)
+        std::cout << std::setw(70) << "Width is on the top!" << std::endl;
+    else
+        std::cout << std::setw(70) << "Width is on the bottom!" << std::endl;
+#endif // DEBUG
 }
 
-void Polygon::MakeCoordsRelative() {
-    //Making coords relative
+void Polygon::makeCoordsRelative() {
     for (size_t i = 0; i < line.size(); i++) {
         line[i].start.x = line[i].start.x - min.x;
         line[i].start.y = line[i].start.y - min.y;
@@ -190,10 +185,13 @@ void Polygon::MakeCoordsRelative() {
         line[i].finish.x = line[i].finish.x - min.x;
         line[i].finish.y = line[i].finish.y - min.y;
     }
+
+#ifdef DEBUG
     std::cout << std::setw(70) << "Coordinates changed to relative!" << std::endl;
+#endif // DEBUG
 }
 
-void Polygon::DeletingExtraLines() {
+void Polygon::deleteExtraLines() {
     int32_t idx = 0;
     //Deleting width
     for (int32_t i = 0; i < line.size(); i++) {
@@ -203,7 +201,6 @@ void Polygon::DeletingExtraLines() {
         }
     }
     line.erase(line.begin() + idx);
-    std::cout << "deleted " << idx << " line" << std::endl;
     idx--;
 
     //Deleting the previous
@@ -218,10 +215,12 @@ void Polygon::DeletingExtraLines() {
     }
     line.erase(line.begin() + idx);
 
-    std::cout << std::setw(70) << "Three sides was deleted!" << std::endl;
+#ifdef DEBUG
+    std::cout << std::setw(70) << "Sides was deleted!" << std::endl;
+#endif // DEBUG
 }
 
-void Polygon::FixOrderLines() {
+void Polygon::fixOrderLines() {
     //Placing coords in right order (0;0) is on the start
     size_t i = 0;
     bool is_clockwise = false;
@@ -230,7 +229,7 @@ void Polygon::FixOrderLines() {
         i++;
     }
     line.erase(line.begin(), line.begin() + i);
-    std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
+
 
     //size_t i = 0;
     //while (!((line[i].start.x == 0 && line[i].start.y == 0) || (line[i].finish.x == 0 && line[i].finish.y == 0))) {
@@ -240,15 +239,11 @@ void Polygon::FixOrderLines() {
     //line.erase(line.begin(), line.begin() + i);
     //std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
 
-    //printLines();
     if (line[0].finish.x == 0) {
         is_clockwise = true;
-        std::cout << "Clockwise! No reverse needed.\n";
     }
     else {
         is_clockwise = false;
-        std::cout << "Anticlockwise! Lines was reversed!\n";
-        std::cout << "start <> finish\n";
 
         for (int32_t i = 0; i < line.size(); i++) {
             Line tempLine;
@@ -256,27 +251,33 @@ void Polygon::FixOrderLines() {
             line[i].finish = line[i].start;
             line[i].start = tempLine.finish;
         }
-
-        //printLines();
-
         std::reverse(line.begin(), line.end());
     }
+#ifdef DEBUG
+    if (is_clockwise) {
+        std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
+        std::cout << "Clockwise! No reverse needed.\n";
+    }
+    else {
+        std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
+        std::cout << "Anticlockwise! Lines was reversed!\n";
+        std::cout << "start <> finish\n";
+    }
+#endif // DEBUG
 }
+
 
 void Polygon::findOffsets() {
     std::string    strTempOffsetType;
     int32_t        tempOffsetHeight;
     int32_t        tempOffsetWidth;
 
-
     for (size_t i = 0; i < line.size(); i++) {
         if (line[i].orient == LineOrientation::horizontal) {
+            tempOffsetWidth = line[i].length;
 
-            if (true == WidthOnTop) {   //top
-     
-                tempOffsetWidth = line[i].length;
+            if (true == widthOnTop) {   //top
                 tempOffsetHeight = (line[i].start.y);
-                //std::cout << tempOffsetHeight << "\n";
 
                 if (tempOffsetHeight == 0)
                     strTempOffsetType = eOffsetTypeToStr(OffsetType::edge);
@@ -286,10 +287,7 @@ void Polygon::findOffsets() {
                     strTempOffsetType = eOffsetTypeToStr(OffsetType::in);
             }
             else {                                         //bottom
-               
-                tempOffsetWidth = line[i].length;
                 tempOffsetHeight = (line[i].start.y - (max.y - min.y));
-                //std::cout << tempOffsetHeight << "\n";
 
                 if (tempOffsetHeight == 0)
                     strTempOffsetType = eOffsetTypeToStr(OffsetType::edge);
@@ -299,10 +297,60 @@ void Polygon::findOffsets() {
                     strTempOffsetType = eOffsetTypeToStr(OffsetType::in);
             }
 
-            strOffsetType+=strTempOffsetType;
             offsetHeight.push_back(tempOffsetHeight);
             offsetWidth.push_back(tempOffsetWidth);
-
+            strOffsetType+=strTempOffsetType;
         }
+    }
+}
+
+void Polygon::process() {
+#ifdef DEBUG
+    calcLines();
+    //printLines();
+
+    makeCoordsRelative();
+    //printLines();
+
+    fixOrderLines();
+    //printLines();
+
+    deleteExtraLines();
+    //printLines();
+
+    findOffsets();
+    printOffsets();
+
+#endif // DEBUG
+
+#ifndef DEBUG
+    calcLines();
+
+    makeCoordsRelative();
+
+    fixOrderLines();
+
+    deleteExtraLines();
+
+    findOffsets();
+#endif // !DEBUG
+
+}
+
+void Layout::findPosOfTarget(const std::string target, const std::string main) {
+    size_t i = 0;
+
+    for (i = main.find(target, i++); i != std::string::npos; i = main.find(target, i + 1))
+        posOfTarget.push_back(i);
+}
+
+void Layout::printPosOfTarget(){
+    if (posOfTarget.empty())
+        std::cout << "There is no target in main!" << std::endl;
+    else {
+        std::cout << "Positions of target in main: ";
+        for (size_t i = 0; i < posOfTarget.size(); i++)
+            std::cout << posOfTarget[i] << " ";
+        std::cout << std::endl;
     }
 }

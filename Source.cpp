@@ -1,11 +1,13 @@
 ﻿#include "poly.h"
 
 int main() {
-    const std::string targetFileName = "txt/dff_coords.txt";
-    const std::string mainFileName = "txt/large_1.txt";
+
+    const std::string targetFileName =     "txt/dff_coords.txt";
+    const std::string mainFileName =       "txt/large_1.txt";
 
     Polygon targetPoly;
     Polygon mainPoly;
+    Layout  layout;
     
     if (targetPoly.readFile(targetFileName)) {
         std::cout << std::setw(55) << targetFileName << " was successfully read!\n";
@@ -23,48 +25,18 @@ int main() {
         return EXIT_FAILURE;
     }
 
-
-    //targetPoly.printLines();
-    targetPoly.calcLines();
-
-    targetPoly.MakeCoordsRelative();
-    //targetPoly.printLines();
-
-    targetPoly.FixOrderLines();
-    //targetPoly.printLines();
-
-    targetPoly.DeletingExtraLines();
-    //targetPoly.printLines();
-
-    targetPoly.findOffsets();
-    //targetPoly.printOffsets();
+    targetPoly.process();
 
     std::cout << "Small poly: " << targetPoly.strOffsetType << std::endl;
 
-    std::cout << "##########################################################################################################\n";
-    std::cout << "##########################################################################################################\n";
-    /*
-        ОБРАБОТКА БОЛЬШОГО ПОЛИГОНА
-    */
 
-    //mainPoly.printLines();
-    mainPoly.calcLines();
-
-    mainPoly.MakeCoordsRelative();
-    //mainPoly.printLines();
-
-    mainPoly.FixOrderLines();
-    //mainPoly.printLines();
-
-    mainPoly.DeletingExtraLines();
-    //mainPoly.printLines();
-
-    mainPoly.findOffsets();
-    //mainPoly.printOffsets();
+    mainPoly.process();
 
     std::cout << "Big poly: " << mainPoly.strOffsetType << std::endl;
 
-    findWanted(targetPoly.strOffsetType, mainPoly.strOffsetType);
+    layout.findPosOfTarget(targetPoly.strOffsetType, mainPoly.strOffsetType);
+    
+    layout.printPosOfTarget();
 
     return EXIT_SUCCESS;
 }
