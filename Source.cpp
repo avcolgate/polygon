@@ -32,11 +32,28 @@ int main() {
 
     mainPoly.process();
 
-    std::cout << "Big poly: " << mainPoly.strOffsetType << std::endl;
+    std::cout << "Main poly: " << mainPoly.strOffsetType << std::endl;
 
     layout.findPosOfTarget(targetPoly.strOffsetType, mainPoly.strOffsetType);
     
     layout.printPosOfTarget();
+
+    layout.checkOffset(layout.posOfTarget,
+
+                       targetPoly.strOffsetType,
+                       targetPoly.offsetHeight,
+                       targetPoly.offsetWidth,
+                       
+                       mainPoly.strOffsetType,
+                       mainPoly.offsetHeight,
+                       mainPoly.offsetWidth);
+
+    if (*std::find(layout.truePosition.begin(), layout.truePosition.end(), true) != 0) {
+        std::cout << std::setw(60) << "YES\n";
+    }
+    else {
+        std::cout << std::setw(60) << "NO\n";
+    }
 
     return EXIT_SUCCESS;
 }

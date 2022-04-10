@@ -70,10 +70,23 @@ public:
     void process();
 };
 
-class Layout {
+class Layout{
 public:
     std::vector<uint32_t> posOfTarget;
+    std::vector<bool> truePosition;
+
 
     void findPosOfTarget(const std::string toFind, const std::string big);
     void printPosOfTarget();
+
+    void checkOffset(
+        std::vector<uint32_t> positions,
+
+        std::string strTarget,
+        std::vector<int32_t> heightTarget,
+        std::vector<int32_t> widthTarget,
+
+        std::string strMain,
+        std::vector<int32_t> heightMain,
+        std::vector<int32_t> widthMain);
 };

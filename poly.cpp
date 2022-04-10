@@ -354,3 +354,46 @@ void Layout::printPosOfTarget(){
         std::cout << std::endl;
     }
 }
+
+
+void Layout::checkOffset(     
+    std::vector<uint32_t> positions,
+    std::string strTarget,
+    std::vector<int32_t> heightTarget,
+    std::vector<int32_t> widthTarget,
+    std::string strMain,
+    std::vector<int32_t> heightMain,
+    std::vector<int32_t> widthMain) {
+
+    truePosition.resize(positions.size(), true);
+
+    // идем по всем позициям Main в Target
+    for (size_t i = 0; i < positions.size(); i++) {
+        
+        //идем по длине строки Таргета
+        for (size_t j = 0; j < strTarget.size(); j++) {
+
+            //не рассматриваем edge по бокам 
+            if (!(strTarget[j] == 'e' && (j == 0 || j == strTarget.size()-1) ) ) {
+                //std::cout << "target " << j << "\n";
+                //std::cout << "main " << j + positions[i] << "\n";
+
+                if (heightTarget[j] == heightMain[j + positions[i]] &&
+                    widthTarget[j]  == widthMain [j + positions[i]]) {
+                    //std::cout << "EQ " << strTarget[j] << "\n";
+                }
+                else {
+                    //std::cout << "NO " << strTarget[j] << "\n";
+                    truePosition[i] = false;
+                }
+            }
+        }
+    }
+
+    for (size_t i = 0; i < truePosition.size(); i++) {
+        if (truePosition[i] == true)
+            std::cout << "Position " << i << " is true\n";
+        else
+            std::cout << "Position " << i << " is wrong\n";
+    }
+}
