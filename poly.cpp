@@ -230,7 +230,6 @@ void Polygon::fixOrderLines() {
     }
     line.erase(line.begin(), line.begin() + i);
 
-
     //size_t i = 0;
     //while (!((line[i].start.x == 0 && line[i].start.y == 0) || (line[i].finish.x == 0 && line[i].finish.y == 0))) {
     //    line.push_back(line[i]);
@@ -239,13 +238,15 @@ void Polygon::fixOrderLines() {
     //line.erase(line.begin(), line.begin() + i);
     //std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
 
-    if (line[0].finish.x == 0) {
+    if (line[0].finish.x == 0) 
+    {
         is_clockwise = true;
     }
-    else {
+    else 
+    {
         is_clockwise = false;
-
-        for (int32_t i = 0; i < line.size(); i++) {
+        for (int32_t i = 0; i < line.size(); i++)
+        {
             Line tempLine;
             tempLine.finish = line[i].finish;
             line[i].finish = line[i].start;
@@ -254,14 +255,14 @@ void Polygon::fixOrderLines() {
         std::reverse(line.begin(), line.end());
     }
 #ifdef DEBUG
-    if (is_clockwise) {
-        std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
+    std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
+    if (is_clockwise) 
+    {
         std::cout << "Clockwise! No reverse needed.\n";
     }
-    else {
-        std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
-        std::cout << "Anticlockwise! Lines was reversed!\n";
-        std::cout << "start <> finish\n";
+    else
+    {
+        std::cout << "Anticlockwise! Lines was reversed!\n" << "start <> finish\n";
     }
 #endif // DEBUG
 }
@@ -275,8 +276,10 @@ void Polygon::findOffsets() {
     for (size_t i = 0; i < line.size(); i++) {
         if (line[i].orient == LineOrientation::horizontal) {
             tempOffsetWidth = line[i].length;
-
-            if (true == widthOnTop) {   //top
+            
+            //top
+            if (true == widthOnTop)   
+            {   
                 tempOffsetHeight = (line[i].start.y);
 
                 if (tempOffsetHeight == 0)
@@ -286,7 +289,10 @@ void Polygon::findOffsets() {
                 else if (tempOffsetHeight > 0)
                     strTempOffsetType = eOffsetTypeToStr(OffsetType::in);
             }
-            else {                                         //bottom
+
+            //bottom
+            else                      
+            {                                         
                 tempOffsetHeight = (line[i].start.y - (max.y - min.y));
 
                 if (tempOffsetHeight == 0)
@@ -297,9 +303,13 @@ void Polygon::findOffsets() {
                     strTempOffsetType = eOffsetTypeToStr(OffsetType::in);
             }
 
-            offsetHeight.push_back(tempOffsetHeight);
-            offsetWidth.push_back(tempOffsetWidth);
-            strOffsetType+=strTempOffsetType;
+            //condition for pushing -- we don't add side "edge" Offsets
+            if (!(strTempOffsetType == "e" && (i == 0 || i == line.size() - 1) ))
+            {
+                offsetHeight.push_back(tempOffsetHeight);
+                offsetWidth.push_back(tempOffsetWidth);
+                strOffsetType+=strTempOffsetType;
+            }
         }
     }
 }
@@ -337,63 +347,125 @@ void Polygon::process() {
 
 }
 
-void Layout::findPosOfTarget(const std::string target, const std::string main) {
+//searching positions of target polygon in main polygon
+void Layout::findPosOfTarget(std::string strTarget, std::string StrMain) {
     size_t i = 0;
 
-    for (i = main.find(target, i++); i != std::string::npos; i = main.find(target, i + 1))
+    for (i = StrMain.find(strTarget, i++); i != std::string::npos; i = StrMain.find(strTarget, i + 1))
         posOfTarget.push_back(i);
+
+    i = 0;
+    std::reverse(strTarget.begin(), strTarget.end());
+    for (i = StrMain.find(strTarget, i++); i != std::string::npos; i = StrMain.find(strTarget, i + 1))
+        posOfReversedTarget.push_back(i);
 }
 
-void Layout::printPosOfTarget(){
+//printing positions of target polygon in main polygon
+void Layout::printPosOfTarget() {
     if (posOfTarget.empty())
         std::cout << "There is no target in main!" << std::endl;
-    else {
+    else
+    {
         std::cout << "Positions of target in main: ";
         for (size_t i = 0; i < posOfTarget.size(); i++)
             std::cout << posOfTarget[i] << " ";
         std::cout << std::endl;
     }
+
+    if (posOfReversedTarget.empty())
+        std::cout << "There is no reversed target in main!" << std::endl;
+    else
+    {
+        std::cout << "Positions of reversed target in main: ";
+        for (size_t i = 0; i < posOfReversedTarget.size(); i++)
+            std::cout << posOfReversedTarget[i] << " ";
+        std::cout << std::endl;
+    }
 }
 
+void Layout::checkOffset(const Polygon &target, const Polygon &main) {
 
-void Layout::checkOffset(     
-    std::vector<uint32_t> positions,
-    std::string strTarget,
-    std::vector<int32_t> heightTarget,
-    std::vector<int32_t> widthTarget,
-    std::string strMain,
-    std::vector<int32_t> heightMain,
-    std::vector<int32_t> widthMain) {
+    truePosition.resize(posOfTarget.size(), true);
+    trueReversePosition.resize(posOfReversedTarget.size(), true);
 
-    truePosition.resize(positions.size(), true);
+    Polygon reverseTarget = target;
+    std::reverse(reverseTarget.offsetHeight.begin(),  reverseTarget.offsetHeight.end());
+    std::reverse(reverseTarget.offsetWidth.begin(),   reverseTarget.offsetWidth.end());
+    std::reverse(reverseTarget.strOffsetType.begin(), reverseTarget.strOffsetType.end());
 
-    // идем по всем позициям Main в Target
-    for (size_t i = 0; i < positions.size(); i++) {
-        
-        //идем по длине строки Таргета
-        for (size_t j = 0; j < strTarget.size(); j++) {
+    std::cout << std::setw(60) << "FORWARD ORDER\n";
+    for (size_t i = 0; i < posOfTarget.size(); i++)
+    {
+        for (size_t j = 0; j < target.strOffsetType.size(); j++)
+        {
+            std::cout << "(" << target.strOffsetType[j] << ")\n";
+            std::cout << std::setw(7) << "target "
+                      << std::setw(3) << j
+                      << " H: " << std::setw(5) << target.offsetHeight[j]
+                      << " W: " << std::setw(5) << target.offsetWidth[j] << "\n";
 
-            //не рассматриваем edge по бокам 
-            if (!(strTarget[j] == 'e' && (j == 0 || j == strTarget.size()-1) ) ) {
-                //std::cout << "target " << j << "\n";
-                //std::cout << "main " << j + positions[i] << "\n";
+            std::cout << std::setw(7) << "main " 
+                      << std::setw(3) << j + posOfTarget[i]
+                      << " H: " << std::setw(5) << main.offsetHeight[j + posOfTarget[i]]
+                      << " W: " << std::setw(5) << main.offsetWidth[j + posOfTarget[i]] << "\n";
 
-                if (heightTarget[j] == heightMain[j + positions[i]] &&
-                    widthTarget[j]  == widthMain [j + positions[i]]) {
-                    //std::cout << "EQ " << strTarget[j] << "\n";
-                }
-                else {
-                    //std::cout << "NO " << strTarget[j] << "\n";
-                    truePosition[i] = false;
-                }
+            if (target.offsetHeight[j] == main.offsetHeight[j + posOfTarget[i]] &&
+                target.offsetWidth[j]  == main.offsetWidth[j + posOfTarget[i]])
+            {
+                std::cout << std::setw(30) << "EQUAL " << "\n";
+            }
+            else
+            {
+                std::cout << std::setw(30) << "NOT EQUAL " << "\n";
+                truePosition[i] = false;
             }
         }
+        std::cout << "\n\n";
     }
 
-    for (size_t i = 0; i < truePosition.size(); i++) {
+    std::cout << std::setw(60) << "REVERSE ORDER\n";
+    for (size_t i = 0; i < posOfReversedTarget.size(); i++)
+    {
+        for (size_t j = 0; j < reverseTarget.strOffsetType.size(); j++)
+        {
+            std::cout << "(" << reverseTarget.strOffsetType[j] << ")\n";
+            std::cout << std::setw(7) << "target "
+                      << std::setw(3) << j
+                      << " H: " << std::setw(5) << reverseTarget.offsetHeight[j]
+                      << " W: " << std::setw(5) << reverseTarget.offsetWidth[j] << "\n";
+
+            std::cout << std::setw(7) << "main "
+                      << std::setw(3) << j + posOfReversedTarget[i]
+                      << " H: " << std::setw(5) << main.offsetHeight[j + posOfReversedTarget[i]]
+                      << " W: " << std::setw(5) << main.offsetWidth[j + posOfReversedTarget[i]] << "\n";
+
+            if (reverseTarget.offsetHeight[j] == main.offsetHeight[j + posOfReversedTarget[i]] &&
+                reverseTarget.offsetWidth[j] == main.offsetWidth[j + posOfReversedTarget[i]])
+            {
+                std::cout << std::setw(30) << "EQUAL " << "\n";
+            }
+            else
+            {
+                std::cout << std::setw(30) << "NOT EQUAL " << "\n";
+                trueReversePosition[i] = false;
+            }
+        }
+        std::cout << "\n\n";
+    }
+
+    for (size_t i = 0; i < truePosition.size(); i++)
+    {
         if (truePosition[i] == true)
-            std::cout << "Position " << i << " is true\n";
+            std::cout << "(FW) Position " << i << " is true\n";
         else
-            std::cout << "Position " << i << " is wrong\n";
+            std::cout << "(FW) Position " << i << " is wrong\n";
+    }
+
+    for (size_t i = 0; i < trueReversePosition.size(); i++)
+    {
+        if (trueReversePosition[i] == true)
+            std::cout << "(RV) Position " << i << " is true\n";
+        else
+            std::cout << "(RV) Position " << i << " is wrong\n";
     }
 }

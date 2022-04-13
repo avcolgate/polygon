@@ -73,20 +73,25 @@ public:
 class Layout{
 public:
     std::vector<uint32_t> posOfTarget;
-    std::vector<bool> truePosition;
+    std::vector<uint32_t> posOfReversedTarget;
 
+    std::vector<bool>     truePosition;
+    std::vector<bool>     trueReversePosition;
 
     void findPosOfTarget(const std::string toFind, const std::string big);
     void printPosOfTarget();
 
-    void checkOffset(
-        std::vector<uint32_t> positions,
+    //void checkOffset(
+    //    std::vector<uint32_t> positions,
+    //
+    //    std::string strTarget,
+    //    std::vector<int32_t> heightTarget,
+    //    std::vector<int32_t> widthTarget,
+    //
+    //    std::string strMain,
+    //    std::vector<int32_t> heightMain,
+    //    std::vector<int32_t> widthMain);
 
-        std::string strTarget,
-        std::vector<int32_t> heightTarget,
-        std::vector<int32_t> widthTarget,
+    void checkOffset(const Polygon &target, const Polygon &main);
 
-        std::string strMain,
-        std::vector<int32_t> heightMain,
-        std::vector<int32_t> widthMain);
 };

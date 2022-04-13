@@ -26,29 +26,20 @@ int main() {
     }
 
     targetPoly.process();
-
-    std::cout << "Small poly: " << targetPoly.strOffsetType << std::endl;
-
-
     mainPoly.process();
 
+    std::cout << "Small poly: " << targetPoly.strOffsetType << std::endl;
     std::cout << "Main poly: " << mainPoly.strOffsetType << std::endl;
 
     layout.findPosOfTarget(targetPoly.strOffsetType, mainPoly.strOffsetType);
     
     layout.printPosOfTarget();
 
-    layout.checkOffset(layout.posOfTarget,
+    layout.checkOffset(targetPoly, mainPoly);
 
-                       targetPoly.strOffsetType,
-                       targetPoly.offsetHeight,
-                       targetPoly.offsetWidth,
-                       
-                       mainPoly.strOffsetType,
-                       mainPoly.offsetHeight,
-                       mainPoly.offsetWidth);
-
-    if (*std::find(layout.truePosition.begin(), layout.truePosition.end(), true) != 0) {
+    if (*std::find(layout.truePosition.begin(),        layout.truePosition.end(),        true) != 0 ||
+        *std::find(layout.trueReversePosition.begin(), layout.trueReversePosition.end(), true) != 0)
+    {
         std::cout << std::setw(60) << "YES\n";
     }
     else {
