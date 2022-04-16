@@ -37,14 +37,27 @@ int main() {
 
     layout.checkOffset(targetPoly, mainPoly);
 
-    if (*std::find(layout.truePosition.begin(),        layout.truePosition.end(),        true) != 0 ||
+    auto checkForward =  std::find(layout.truePosition.begin(),        layout.truePosition.end(), true);
+    auto checkReverse =  std::find(layout.trueReversePosition.begin(), layout.trueReversePosition.end(), true);
+
+    if (checkForward == layout.truePosition.end() &&
+        checkReverse == layout.trueReversePosition.end())
+    {
+        std::cout << "\nNOT FOUND!!\n";
+    }
+    else
+    {
+        std::cout << "\nFOUND!!\n";
+    }
+
+   /* if (*std::find(layout.truePosition.begin(),        layout.truePosition.end(),        true) != 0 ||
         *std::find(layout.trueReversePosition.begin(), layout.trueReversePosition.end(), true) != 0)
     {
         std::cout << std::setw(60) << "YES\n";
     }
     else {
         std::cout << std::setw(60) << "NO\n";
-    }
+    }*/
 
-    return EXIT_SUCCESS;
+    return 0;
 }

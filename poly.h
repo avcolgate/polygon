@@ -35,7 +35,7 @@ public:
 class Line {
 public:
     Point            start;
-    Point            finish;
+    Point            end;
                  
     uint32_t         length;
     LineOrientation  orient;
@@ -78,7 +78,7 @@ public:
     std::vector<bool>     truePosition;
     std::vector<bool>     trueReversePosition;
 
-    void findPosOfTarget(const std::string toFind, const std::string big);
+    void findPosOfTarget(std::string target, std::string main);
     void printPosOfTarget();
 
     //void checkOffset(

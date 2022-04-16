@@ -34,12 +34,12 @@ bool Polygon::readFile(const std::string& fileName) {
     do {
         if (file.eof())
             return false;
-        file >> tempLine.finish.x >> tempLine.finish.y;
+        file >> tempLine.end.x >> tempLine.end.y;
 
         //calculating length and orientation
-        tempLen = abs(tempLine.finish.x - tempLine.start.x);
+        tempLen = abs(tempLine.end.x - tempLine.start.x);
         if (tempLen == 0) {
-            tempLen = abs(tempLine.finish.y - tempLine.start.y);
+            tempLen = abs(tempLine.end.y - tempLine.start.y);
             tempLine.orient = LineOrientation::vertical;
         }
         else {
@@ -48,10 +48,10 @@ bool Polygon::readFile(const std::string& fileName) {
         tempLine.length = tempLen;
         line.push_back(tempLine);
 
-        tempLine.start.x = tempLine.finish.x;
-        tempLine.start.y = tempLine.finish.y;
+        tempLine.start.x = tempLine.end.x;
+        tempLine.start.y = tempLine.end.y;
 
-    } while (!(tempLine.finish.x == line.at(0).start.x && tempLine.finish.y == line.at(0).start.y));
+    } while (!(tempLine.end.x == line.at(0).start.x && tempLine.end.y == line.at(0).start.y));
     
     file.close();
     return true;
@@ -63,13 +63,13 @@ void Polygon::printLines() {
     string tempOrient;
     cout << "Lines table:\n";
     cout << setw(18) << "start X" << setw(15) << "start Y"
-        << setw(15) << "finish X" << setw(15) << "finish Y"
+        << setw(15) << "end X" << setw(15) << "end Y"
         << setw(16) << "length" << setw(16) << "orientation\n";
     for (size_t i = 0; i < line.size(); i++) {
         tempOrient = eLineOrientToStr(line[i].orient);
 
         cout << "(" << i << ")" << setw(15) << line[i].start.x << setw(15) << line[i].start.y
-            << setw(15) << line[i].finish.x << setw(15) << line[i].finish.y
+            << setw(15) << line[i].end.x << setw(15) << line[i].end.y
             << setw(16) << line[i].length << setw(15) << tempOrient << "\n";
     }
     cout << "\n";
@@ -95,7 +95,7 @@ void Polygon::calcLines() {
         if (line[i].length > width && line[i].orient == LineOrientation::horizontal) {
             width = line[i].length;
             widthNum = i;
-        }
+        }   
     }
             
     if (widthNum == line.size() - 1) {
@@ -122,21 +122,21 @@ void Polygon::calcLines() {
     */
 
     //if width is on the top
-    if (line[widthNum].finish.y > line[nextNum].finish.y) {
+    if (line[nextNum].end.y < line[widthNum].end.y) {
         widthOnTop = true;
         //max
-        if (line[widthNum].finish.x > line[widthNum].start.x) {
-            max.x = line[widthNum].finish.x;
-            max.y = line[widthNum].finish.y;
+        if (line[widthNum].end.x > line[widthNum].start.x) {
+            max.x = line[widthNum].end.x;
+            max.y = line[widthNum].end.y;
         }
         else {
             max.x = line[widthNum].start.x;
             max.y = line[widthNum].start.y;
         }
         //min
-        if (line[nextNum].finish.x < line[prevNum].start.x) {
-            min.x = line[nextNum].finish.x;
-            min.y = line[nextNum].finish.y;
+        if (line[nextNum].end.x < line[prevNum].start.x) {
+            min.x = line[nextNum].end.x;
+            min.y = line[nextNum].end.y;
         }
         else {
             min.x = line[prevNum].start.x;
@@ -147,18 +147,18 @@ void Polygon::calcLines() {
     else {
         widthOnTop = false;
         //max
-        if (line[nextNum].finish.x > line[prevNum].start.x) {
-            max.x = line[nextNum].finish.x;
-            max.y = line[nextNum].finish.y;
+        if (line[nextNum].end.x > line[prevNum].start.x) {
+            max.x = line[nextNum].end.x;
+            max.y = line[nextNum].end.y;
         }
         else {
             max.x = line[prevNum].start.x;
             max.y = line[prevNum].start.y;
         }
         //min
-        if (line[widthNum].finish.x < line[widthNum].start.x) {
-            min.x = line[widthNum].finish.x;
-            min.y = line[widthNum].finish.y;
+        if (line[widthNum].end.x < line[widthNum].start.x) {
+            min.x = line[widthNum].end.x;
+            min.y = line[widthNum].end.y;
         }
         else {
             min.x = line[widthNum].start.x;
@@ -182,12 +182,57 @@ void Polygon::makeCoordsRelative() {
         line[i].start.x = line[i].start.x - min.x;
         line[i].start.y = line[i].start.y - min.y;
 
-        line[i].finish.x = line[i].finish.x - min.x;
-        line[i].finish.y = line[i].finish.y - min.y;
+        line[i].end.x = line[i].end.x - min.x;
+        line[i].end.y = line[i].end.y - min.y;
     }
 
 #ifdef DEBUG
     std::cout << std::setw(70) << "Coordinates changed to relative!" << std::endl;
+#endif // DEBUG
+}
+
+void Polygon::fixOrderLines() {
+    //Placing coords in right order (0;0) is on the start
+    size_t i = 0;
+    bool is_clockwise = false;
+    while (! (line[i].start.x == 0 && line[i].start.y == 0) ) {
+        line.push_back(line[i]);
+        i++;
+    }
+    line.erase(line.begin(), line.begin() + i);
+
+    //не нужно, ведь каждая точка есть, как в старте, так и в энде
+    //size_t i = 0;
+    //while (!((line[i].start.x == 0 && line[i].start.y == 0) || (line[i].end.x == 0 && line[i].end.y == 0))) {
+    //    line.push_back(line[i]);
+    //    i++;
+    //}
+    //line.erase(line.begin(), line.begin() + i);
+    //std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
+
+    if (line[0].end.x == 0) 
+    {
+        is_clockwise = true;
+    }
+    else 
+    {
+        is_clockwise = false;
+        for (int32_t i = 0; i < line.size(); i++)
+        {
+            std::swap(line[i].end, line[i].start);
+        }
+        std::reverse(line.begin(), line.end());
+    }
+#ifdef DEBUG
+    std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
+    if (is_clockwise) 
+    {
+        std::cout << "Clockwise! No reverse needed.\n";
+    }
+    else
+    {
+        std::cout << "Anticlockwise! Lines was reversed!\n" << "start <> end\n";
+    }
 #endif // DEBUG
 }
 
@@ -219,54 +264,6 @@ void Polygon::deleteExtraLines() {
     std::cout << std::setw(70) << "Sides was deleted!" << std::endl;
 #endif // DEBUG
 }
-
-void Polygon::fixOrderLines() {
-    //Placing coords in right order (0;0) is on the start
-    size_t i = 0;
-    bool is_clockwise = false;
-    while (! (line[i].start.x == 0 && line[i].start.y == 0) ) {
-        line.push_back(line[i]);
-        i++;
-    }
-    line.erase(line.begin(), line.begin() + i);
-
-    //size_t i = 0;
-    //while (!((line[i].start.x == 0 && line[i].start.y == 0) || (line[i].finish.x == 0 && line[i].finish.y == 0))) {
-    //    line.push_back(line[i]);
-    //    i++;
-    //}
-    //line.erase(line.begin(), line.begin() + i);
-    //std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
-
-    if (line[0].finish.x == 0) 
-    {
-        is_clockwise = true;
-    }
-    else 
-    {
-        is_clockwise = false;
-        for (int32_t i = 0; i < line.size(); i++)
-        {
-            Line tempLine;
-            tempLine.finish = line[i].finish;
-            line[i].finish = line[i].start;
-            line[i].start = tempLine.finish;
-        }
-        std::reverse(line.begin(), line.end());
-    }
-#ifdef DEBUG
-    std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
-    if (is_clockwise) 
-    {
-        std::cout << "Clockwise! No reverse needed.\n";
-    }
-    else
-    {
-        std::cout << "Anticlockwise! Lines was reversed!\n" << "start <> finish\n";
-    }
-#endif // DEBUG
-}
-
 
 void Polygon::findOffsets() {
     std::string    strTempOffsetType;
@@ -326,7 +323,7 @@ void Polygon::process() {
     //printLines();
 
     deleteExtraLines();
-    //printLines();
+    printLines();
 
     findOffsets();
     printOffsets();
