@@ -2,46 +2,46 @@
 
 int main() {
 
-    const std::string targetFileName =     "txt/dff_coords.txt";
-    const std::string mainFileName =       "txt/large_1.txt";
+    const std::string elementFileName =     "txt/dff_coords.txt";
+    const std::string layoutFileName =       "txt/large_1.txt";
 
-    Polygon targetPoly;
-    Polygon mainPoly;
-    Layout  layout;
+    Polygon   element;
+    Polygon   layout;
+    Topology  topology;
     
-    if (targetPoly.readFile(targetFileName)) {
-        std::cout << std::setw(55) << targetFileName << " was successfully read!\n";
+    if (element.readFile(elementFileName)) {
+        std::cout << std::setw(55) << elementFileName << " was successfully read!\n";
     }
     else {
-        std::cout << "ERROR in opening " << targetFileName << std::endl;
+        std::cout << "ERROR in opening " << elementFileName << std::endl;
         return EXIT_FAILURE;
     }
 
-    if (mainPoly.readFile(mainFileName)) {
-        std::cout << std::setw(55) << mainFileName << " was successfully read!\n";
+    if (layout.readFile(layoutFileName)) {
+        std::cout << std::setw(55) << layoutFileName << " was successfully read!\n";
     }
     else {
-        std::cout << "ERROR in opening " << mainFileName << std::endl;
+        std::cout << "ERROR in opening " << layoutFileName << std::endl;
         return EXIT_FAILURE;
     }
 
-    targetPoly.process();
-    mainPoly.process();
+    element.process();
+    layout.process();
 
-    std::cout << "Small poly: " << targetPoly.strOffsetType << std::endl;
-    std::cout << "Main poly: " << mainPoly.strOffsetType << std::endl;
+    std::cout << "Element: " << element.strOffsetType << std::endl;
+    std::cout << "Layout:  " << layout.strOffsetType << std::endl;
 
-    layout.findPosOfTarget(targetPoly.strOffsetType, mainPoly.strOffsetType);
+    topology.findPosOfElement(element.strOffsetType, layout.strOffsetType);
     
-    layout.printPosOfTarget();
+    topology.printPosOfElement();
 
-    layout.checkOffset(targetPoly, mainPoly);
+    topology.checkOffset(element, layout);
 
-    auto checkForward =  std::find(layout.truePosition.begin(),        layout.truePosition.end(), true);
-    auto checkReverse =  std::find(layout.trueReversePosition.begin(), layout.trueReversePosition.end(), true);
+    auto checkForward =  std::find(topology.truePosition.begin(),        topology.truePosition.end(), true);
+    auto checkReverse =  std::find(topology.trueReversePosition.begin(), topology.trueReversePosition.end(), true);
 
-    if (checkForward == layout.truePosition.end() &&
-        checkReverse == layout.trueReversePosition.end())
+    if (checkForward == topology.truePosition.end() &&
+        checkReverse == topology.trueReversePosition.end())
     {
         std::cout << "\nNOT FOUND!!\n";
     }
@@ -50,8 +50,8 @@ int main() {
         std::cout << "\nFOUND!!\n";
     }
 
-   /* if (*std::find(layout.truePosition.begin(),        layout.truePosition.end(),        true) != 0 ||
-        *std::find(layout.trueReversePosition.begin(), layout.trueReversePosition.end(), true) != 0)
+   /* if (*std::find(topology.truePosition.begin(),        topology.truePosition.end(),        true) != 0 ||
+        *std::find(topology.trueReversePosition.begin(), topology.trueReversePosition.end(), true) != 0)
     {
         std::cout << std::setw(60) << "YES\n";
     }

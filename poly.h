@@ -43,7 +43,7 @@ public:
 };
 
 class Polygon{
-public:
+public: 
     std::vector<Line>          line;
     std::string                strOffsetType;
     std::vector<int32_t>       offsetHeight;
@@ -70,16 +70,16 @@ public:
     void process();
 };
 
-class Layout{
+class Topology{
 public:
-    std::vector<uint32_t> posOfTarget;
-    std::vector<uint32_t> posOfReversedTarget;
+    std::vector<uint32_t> posOfElement;
+    std::vector<uint32_t> posOfReversedElement;
 
     std::vector<bool>     truePosition;
     std::vector<bool>     trueReversePosition;
 
-    void findPosOfTarget(std::string target, std::string main);
-    void printPosOfTarget();
+    void findPosOfElement(std::string element, std::string layout);
+    void printPosOfElement();
 
     //void checkOffset(
     //    std::vector<uint32_t> positions,
@@ -92,6 +92,6 @@ public:
     //    std::vector<int32_t> heightMain,
     //    std::vector<int32_t> widthMain);
 
-    void checkOffset(const Polygon &target, const Polygon &main);
+    void checkOffset(const Polygon &element, const Polygon &layout);
 
 };

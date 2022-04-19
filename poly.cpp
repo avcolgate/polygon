@@ -344,70 +344,72 @@ void Polygon::process() {
 
 }
 
-//searching positions of target polygon in main polygon
-void Layout::findPosOfTarget(std::string strTarget, std::string StrMain) {
+//searching positions of element in layout
+void Topology::findPosOfElement(std::string strElement, std::string StrLayout) {
     size_t i = 0;
 
-    for (i = StrMain.find(strTarget, i++); i != std::string::npos; i = StrMain.find(strTarget, i + 1))
-        posOfTarget.push_back(i);
+    for (i = StrLayout.find(strElement, i++); i != std::string::npos; i = StrLayout.find(strElement, i + 1)) {
+        posOfElement.push_back(i);
+    }
 
     i = 0;
-    std::reverse(strTarget.begin(), strTarget.end());
-    for (i = StrMain.find(strTarget, i++); i != std::string::npos; i = StrMain.find(strTarget, i + 1))
-        posOfReversedTarget.push_back(i);
-}
-
-//printing positions of target polygon in main polygon
-void Layout::printPosOfTarget() {
-    if (posOfTarget.empty())
-        std::cout << "There is no target in main!" << std::endl;
-    else
-    {
-        std::cout << "Positions of target in main: ";
-        for (size_t i = 0; i < posOfTarget.size(); i++)
-            std::cout << posOfTarget[i] << " ";
-        std::cout << std::endl;
-    }
-
-    if (posOfReversedTarget.empty())
-        std::cout << "There is no reversed target in main!" << std::endl;
-    else
-    {
-        std::cout << "Positions of reversed target in main: ";
-        for (size_t i = 0; i < posOfReversedTarget.size(); i++)
-            std::cout << posOfReversedTarget[i] << " ";
-        std::cout << std::endl;
+    std::reverse(strElement.begin(), strElement.end());
+    for (i = StrLayout.find(strElement, i++); i != std::string::npos; i = StrLayout.find(strElement, i + 1)) {
+        posOfReversedElement.push_back(i);
     }
 }
 
-void Layout::checkOffset(const Polygon &target, const Polygon &main) {
+//printing positions of element in layout
+void Topology::printPosOfElement() {
+    if (posOfElement.empty())
+        std::cout << "There is no element in layout!" << std::endl;
+    else
+    {
+        std::cout << "Positions of element in layout: ";
+        for (size_t i = 0; i < posOfElement.size(); i++)
+            std::cout << posOfElement[i] << " ";
+        std::cout << std::endl;
+    }
 
-    truePosition.resize(posOfTarget.size(), true);
-    trueReversePosition.resize(posOfReversedTarget.size(), true);
+    if (posOfReversedElement.empty())
+        std::cout << "There is no reversed element in layout!" << std::endl;
+    else
+    {
+        std::cout << "Positions of reversed element in layout: ";
+        for (size_t i = 0; i < posOfReversedElement.size(); i++)
+            std::cout << posOfReversedElement[i] << " ";
+        std::cout << std::endl;
+    }
+}
 
-    Polygon reverseTarget = target;
-    std::reverse(reverseTarget.offsetHeight.begin(),  reverseTarget.offsetHeight.end());
-    std::reverse(reverseTarget.offsetWidth.begin(),   reverseTarget.offsetWidth.end());
-    std::reverse(reverseTarget.strOffsetType.begin(), reverseTarget.strOffsetType.end());
+void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
+
+    truePosition.resize(posOfElement.size(), true);
+    trueReversePosition.resize(posOfReversedElement.size(), true);
+
+    Polygon reverseElement = element;
+    std::reverse(reverseElement.offsetHeight.begin(),  reverseElement.offsetHeight.end());
+    std::reverse(reverseElement.offsetWidth.begin(),   reverseElement.offsetWidth.end());
+    std::reverse(reverseElement.strOffsetType.begin(), reverseElement.strOffsetType.end());
 
     std::cout << std::setw(60) << "FORWARD ORDER\n";
-    for (size_t i = 0; i < posOfTarget.size(); i++)
+    for (size_t i = 0; i < posOfElement.size(); i++)
     {
-        for (size_t j = 0; j < target.strOffsetType.size(); j++)
+        for (size_t j = 0; j < element.strOffsetType.size(); j++)
         {
-            std::cout << "(" << target.strOffsetType[j] << ")\n";
-            std::cout << std::setw(7) << "target "
+            std::cout << "(" << element.strOffsetType[j] << ")\n";
+            std::cout << std::setw(8) << "element "
                       << std::setw(3) << j
-                      << " H: " << std::setw(5) << target.offsetHeight[j]
-                      << " W: " << std::setw(5) << target.offsetWidth[j] << "\n";
+                      << " H: " << std::setw(5) << element.offsetHeight[j]
+                      << " W: " << std::setw(5) << element.offsetWidth[j] << "\n";
 
-            std::cout << std::setw(7) << "main " 
-                      << std::setw(3) << j + posOfTarget[i]
-                      << " H: " << std::setw(5) << main.offsetHeight[j + posOfTarget[i]]
-                      << " W: " << std::setw(5) << main.offsetWidth[j + posOfTarget[i]] << "\n";
+            std::cout << std::setw(8) << "layout " 
+                      << std::setw(3) << j + posOfElement[i]
+                      << " H: " << std::setw(5) << layout.offsetHeight[j + posOfElement[i]]
+                      << " W: " << std::setw(5) << layout.offsetWidth[j + posOfElement[i]] << "\n";
 
-            if (target.offsetHeight[j] == main.offsetHeight[j + posOfTarget[i]] &&
-                target.offsetWidth[j]  == main.offsetWidth[j + posOfTarget[i]])
+            if (element.offsetHeight[j] == layout.offsetHeight[j + posOfElement[i]] &&
+                element.offsetWidth[j]  == layout.offsetWidth[j + posOfElement[i]])
             {
                 std::cout << std::setw(30) << "EQUAL " << "\n";
             }
@@ -421,23 +423,23 @@ void Layout::checkOffset(const Polygon &target, const Polygon &main) {
     }
 
     std::cout << std::setw(60) << "REVERSE ORDER\n";
-    for (size_t i = 0; i < posOfReversedTarget.size(); i++)
+    for (size_t i = 0; i < posOfReversedElement.size(); i++)
     {
-        for (size_t j = 0; j < reverseTarget.strOffsetType.size(); j++)
+        for (size_t j = 0; j < reverseElement.strOffsetType.size(); j++)
         {
-            std::cout << "(" << reverseTarget.strOffsetType[j] << ")\n";
-            std::cout << std::setw(7) << "target "
+            std::cout << "(" << reverseElement.strOffsetType[j] << ")\n";
+            std::cout << std::setw(8) << "element "
                       << std::setw(3) << j
-                      << " H: " << std::setw(5) << reverseTarget.offsetHeight[j]
-                      << " W: " << std::setw(5) << reverseTarget.offsetWidth[j] << "\n";
+                      << " H: " << std::setw(5) << reverseElement.offsetHeight[j]
+                      << " W: " << std::setw(5) << reverseElement.offsetWidth[j] << "\n";
 
-            std::cout << std::setw(7) << "main "
-                      << std::setw(3) << j + posOfReversedTarget[i]
-                      << " H: " << std::setw(5) << main.offsetHeight[j + posOfReversedTarget[i]]
-                      << " W: " << std::setw(5) << main.offsetWidth[j + posOfReversedTarget[i]] << "\n";
+            std::cout << std::setw(8) << "layout "
+                      << std::setw(3) << j + posOfReversedElement[i]
+                      << " H: " << std::setw(5) << layout.offsetHeight[j + posOfReversedElement[i]]
+                      << " W: " << std::setw(5) << layout.offsetWidth[j + posOfReversedElement[i]] << "\n";
 
-            if (reverseTarget.offsetHeight[j] == main.offsetHeight[j + posOfReversedTarget[i]] &&
-                reverseTarget.offsetWidth[j] == main.offsetWidth[j + posOfReversedTarget[i]])
+            if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + posOfReversedElement[i]] &&
+                reverseElement.offsetWidth[j] == layout.offsetWidth[j + posOfReversedElement[i]])
             {
                 std::cout << std::setw(30) << "EQUAL " << "\n";
             }
