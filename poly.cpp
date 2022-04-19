@@ -404,7 +404,7 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                           << " H: " << std::setw(5) << layout.offsetHeight[j + posOfElement[i]]
                           << " W: " << std::setw(5) << layout.offsetWidth[j + posOfElement[i]] << "\n";
 
-                //боковые проверяем по особенному
+                //special method for 0 and last offsets
                 if (j == 0 || j == element.strOffsetType.size() - 1)
                 {
                     if (element.offsetHeight[j] == layout.offsetHeight[j + posOfElement[i]] &&
@@ -418,7 +418,7 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                         truePosition[i] = false;
                     }
                 }
-                //не боковые
+                //not first or last
                 else
                 {
                     if (element.offsetHeight[j] == layout.offsetHeight[j + posOfElement[i]] &&
@@ -454,7 +454,7 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                           << " H: " << std::setw(5) << layout.offsetHeight[j + posOfReversedElement[i]]
                           << " W: " << std::setw(5) << layout.offsetWidth[j + posOfReversedElement[i]] << "\n";
 
-                //боковые проверяем по особенному
+                //special method for 0 and last offsets
                 if (j == 0 || j == element.strOffsetType.size() - 1)
                 {
                     if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + posOfReversedElement[i]] &&
@@ -468,7 +468,7 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                         trueReversePosition[i] = false;
                     }
                 }
-                //не боковые
+                //not first or last
                 else
                 {
                     if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + posOfReversedElement[i]] &&
