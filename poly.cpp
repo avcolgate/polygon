@@ -299,14 +299,9 @@ void Polygon::findOffsets() {
                 else if (tempOffsetHeight < 0)
                     strTempOffsetType = eOffsetTypeToStr(OffsetType::in);
             }
-
-            //condition for pushing -- we don't add side "edge" Offsets
-            if (!(strTempOffsetType == "e" && (i == 0 || i == line.size() - 1) ))
-            {
-                offsetHeight.push_back(tempOffsetHeight);
-                offsetWidth.push_back(tempOffsetWidth);
-                strOffsetType+=strTempOffsetType;
-            }
+            offsetHeight.push_back(tempOffsetHeight);
+            offsetWidth.push_back(tempOffsetWidth);
+            strOffsetType+=strTempOffsetType;
         }
     }
 }
@@ -392,79 +387,121 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
     std::reverse(reverseElement.offsetWidth.begin(),   reverseElement.offsetWidth.end());
     std::reverse(reverseElement.strOffsetType.begin(), reverseElement.strOffsetType.end());
 
-    std::cout << std::setw(60) << "FORWARD ORDER\n";
-    for (size_t i = 0; i < posOfElement.size(); i++)
-    {
-        for (size_t j = 0; j < element.strOffsetType.size(); j++)
+    if (!posOfElement.empty()) {
+        std::cout << std::setw(60) << "FORWARD ORDER\n";
+        for (size_t i = 0; i < posOfElement.size(); i++)
         {
-            std::cout << "(" << element.strOffsetType[j] << ")\n";
-            std::cout << std::setw(8) << "element "
-                      << std::setw(3) << j
-                      << " H: " << std::setw(5) << element.offsetHeight[j]
-                      << " W: " << std::setw(5) << element.offsetWidth[j] << "\n";
-
-            std::cout << std::setw(8) << "layout " 
-                      << std::setw(3) << j + posOfElement[i]
-                      << " H: " << std::setw(5) << layout.offsetHeight[j + posOfElement[i]]
-                      << " W: " << std::setw(5) << layout.offsetWidth[j + posOfElement[i]] << "\n";
-
-            if (element.offsetHeight[j] == layout.offsetHeight[j + posOfElement[i]] &&
-                element.offsetWidth[j]  == layout.offsetWidth[j + posOfElement[i]])
+            for (size_t j = 0; j < element.strOffsetType.size(); j++)
             {
-                std::cout << std::setw(30) << "EQUAL " << "\n";
+                std::cout << "(" << element.strOffsetType[j] << ")\n";
+                std::cout << std::setw(8) << "element "
+                          << std::setw(3) << j
+                          << " H: " << std::setw(5) << element.offsetHeight[j]
+                          << " W: " << std::setw(5) << element.offsetWidth[j] << "\n";
+
+                std::cout << std::setw(8) << "layout " 
+                          << std::setw(3) << j + posOfElement[i]
+                          << " H: " << std::setw(5) << layout.offsetHeight[j + posOfElement[i]]
+                          << " W: " << std::setw(5) << layout.offsetWidth[j + posOfElement[i]] << "\n";
+
+                //боковые проверяем по особенному
+                if (j == 0 || j == element.strOffsetType.size() - 1)
+                {
+                    if (element.offsetHeight[j] == layout.offsetHeight[j + posOfElement[i]] &&
+                        element.offsetWidth[j] <= layout.offsetWidth[j + posOfElement[i]])
+                    {
+                        std::cout << std::setw(30) << "OK " << "\n";
+                    }
+                    else
+                    {
+                        std::cout << std::setw(30) << "WRONG " << "\n";
+                        truePosition[i] = false;
+                    }
+                }
+                //не боковые
+                else
+                {
+                    if (element.offsetHeight[j] == layout.offsetHeight[j + posOfElement[i]] &&
+                        element.offsetWidth[j]  == layout.offsetWidth[j + posOfElement[i]])
+                    {
+                        std::cout << std::setw(30) << "OK " << "\n";
+                    }
+                    else
+                    {
+                        std::cout << std::setw(30) << "WRONG " << "\n";
+                        truePosition[i] = false;
+                    }
+                }
             }
-            else
-            {
-                std::cout << std::setw(30) << "NOT EQUAL " << "\n";
-                truePosition[i] = false;
-            }
+            std::cout << "\n\n";
         }
-        std::cout << "\n\n";
     }
 
-    std::cout << std::setw(60) << "REVERSE ORDER\n";
-    for (size_t i = 0; i < posOfReversedElement.size(); i++)
-    {
-        for (size_t j = 0; j < reverseElement.strOffsetType.size(); j++)
+    if (!posOfReversedElement.empty()) {
+        std::cout << std::setw(60) << "REVERSE ORDER\n";
+        for (size_t i = 0; i < posOfReversedElement.size(); i++)
         {
-            std::cout << "(" << reverseElement.strOffsetType[j] << ")\n";
-            std::cout << std::setw(8) << "element "
-                      << std::setw(3) << j
-                      << " H: " << std::setw(5) << reverseElement.offsetHeight[j]
-                      << " W: " << std::setw(5) << reverseElement.offsetWidth[j] << "\n";
-
-            std::cout << std::setw(8) << "layout "
-                      << std::setw(3) << j + posOfReversedElement[i]
-                      << " H: " << std::setw(5) << layout.offsetHeight[j + posOfReversedElement[i]]
-                      << " W: " << std::setw(5) << layout.offsetWidth[j + posOfReversedElement[i]] << "\n";
-
-            if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + posOfReversedElement[i]] &&
-                reverseElement.offsetWidth[j] == layout.offsetWidth[j + posOfReversedElement[i]])
+            for (size_t j = 0; j < reverseElement.strOffsetType.size(); j++)
             {
-                std::cout << std::setw(30) << "EQUAL " << "\n";
+                std::cout << "(" << reverseElement.strOffsetType[j] << ")\n";
+                std::cout << std::setw(8) << "element "
+                          << std::setw(3) << j
+                          << " H: " << std::setw(5) << reverseElement.offsetHeight[j]
+                          << " W: " << std::setw(5) << reverseElement.offsetWidth[j] << "\n";
+
+                std::cout << std::setw(8) << "layout "
+                          << std::setw(3) << j + posOfReversedElement[i]
+                          << " H: " << std::setw(5) << layout.offsetHeight[j + posOfReversedElement[i]]
+                          << " W: " << std::setw(5) << layout.offsetWidth[j + posOfReversedElement[i]] << "\n";
+
+                //боковые проверяем по особенному
+                if (j == 0 || j == element.strOffsetType.size() - 1)
+                {
+                    if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + posOfReversedElement[i]] &&
+                        reverseElement.offsetWidth[j] <= layout.offsetWidth[j + posOfReversedElement[i]])
+                    {
+                        std::cout << std::setw(30) << "OK " << "\n";
+                    }
+                    else
+                    {
+                        std::cout << std::setw(30) << "WRONG " << "\n";
+                        trueReversePosition[i] = false;
+                    }
+                }
+                //не боковые
+                else
+                {
+                    if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + posOfReversedElement[i]] &&
+                        reverseElement.offsetWidth[j] == layout.offsetWidth[j + posOfReversedElement[i]])
+                    {
+                        std::cout << std::setw(30) << "OK " << "\n";
+                    }
+                    else
+                    {
+                        std::cout << std::setw(30) << "WRONG " << "\n";
+                        trueReversePosition[i] = false;
+                    }
+                }
             }
-            else
-            {
-                std::cout << std::setw(30) << "NOT EQUAL " << "\n";
-                trueReversePosition[i] = false;
-            }
+            std::cout << "\n\n";
         }
-        std::cout << "\n\n";
     }
+
+    
 
     for (size_t i = 0; i < truePosition.size(); i++)
     {
         if (truePosition[i] == true)
-            std::cout << "(FW) Position " << i << " is true\n";
+            std::cout << "(FORWARD) Position " << i << " is true\n";
         else
-            std::cout << "(FW) Position " << i << " is wrong\n";
+            std::cout << "(FORWARD) Position " << i << " is wrong\n";
     }
 
     for (size_t i = 0; i < trueReversePosition.size(); i++)
     {
         if (trueReversePosition[i] == true)
-            std::cout << "(RV) Position " << i << " is true\n";
+            std::cout << "(REVERSED) Position " << i << " is true\n";
         else
-            std::cout << "(RV) Position " << i << " is wrong\n";
+            std::cout << "(REVERSED) Position " << i << " is wrong\n";
     }
 }
