@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <algorithm>
 
-#define  DEBUG
+//#define  DEBUG
 
 enum class LineOrientation {
     undefined = 0,
@@ -50,9 +50,8 @@ public:
     std::vector<int32_t>       offsetWidth;
     bool                       widthOnTop;
   
-    Point min, max;
-
-    uint32_t width, height;
+    Point                      min, max;
+    uint32_t                   width, height;
 
     Polygon() :max{ std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::min() },
                min{ std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max() },
@@ -81,17 +80,7 @@ public:
     void findPosOfElement(std::string element, std::string layout);
     void printPosOfElement();
 
-    //void checkOffset(
-    //    std::vector<uint32_t> positions,
-    //
-    //    std::string strTarget,
-    //    std::vector<int32_t> heightTarget,
-    //    std::vector<int32_t> widthTarget,
-    //
-    //    std::string strMain,
-    //    std::vector<int32_t> heightMain,
-    //    std::vector<int32_t> widthMain);
-
     void checkOffset(const Polygon &element, const Polygon &layout);
 
+    std::vector<Point>Find(const Polygon& element, const Polygon& layout);
 };

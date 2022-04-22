@@ -3,5 +3,5 @@ base.DOCX
 poly.vcxproj
 poly.vcxproj.filters
 poly.vcxproj.user
-table.XLSX
+*.XLSX
 x64/

@@ -9,27 +9,28 @@ int main() {
     Polygon   layout;
     Topology  topology;
     
-    if (element.readFile(elementFileName)) {
+    if (element.readFile(elementFileName))
+    {
         std::cout << std::setw(55) << elementFileName << " was successfully read!\n";
+        element.process();
     }
     else {
-        std::cout << "ERROR in opening " << elementFileName << std::endl;
+        std::cout << "ERROR in opening file of element \"" << elementFileName << "\"\n";
         return EXIT_FAILURE;
     }
 
-    if (layout.readFile(layoutFileName)) {
+    if (layout.readFile(layoutFileName)) 
+    {
         std::cout << std::setw(55) << layoutFileName << " was successfully read!\n";
+        layout.process();
     }
     else {
-        std::cout << "ERROR in opening " << layoutFileName << std::endl;
+        std::cout << "ERROR in opening file of layout \"" << layoutFileName << "\"\n";
         return EXIT_FAILURE;
     }
-
-    element.process();
-    layout.process();
 
     std::cout << "Element: " << element.strOffsetType << std::endl;
-    std::cout << "Layout:  " << layout.strOffsetType << std::endl;
+    std::cout << "Layout:  " << layout.strOffsetType << std::endl << std::endl;
 
     topology.findPosOfElement(element.strOffsetType, layout.strOffsetType);
     
@@ -49,15 +50,6 @@ int main() {
     {
         std::cout << "\nFOUND!!\n";
     }
-
-   /* if (*std::find(topology.truePosition.begin(),        topology.truePosition.end(),        true) != 0 ||
-        *std::find(topology.trueReversePosition.begin(), topology.trueReversePosition.end(), true) != 0)
-    {
-        std::cout << std::setw(60) << "YES\n";
-    }
-    else {
-        std::cout << std::setw(60) << "NO\n";
-    }*/
 
     return 0;
 }

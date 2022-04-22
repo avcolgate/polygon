@@ -201,15 +201,6 @@ void Polygon::fixOrderLines() {
     }
     line.erase(line.begin(), line.begin() + i);
 
-    //не нужно, ведь каждая точка есть, как в старте, так и в энде
-    //size_t i = 0;
-    //while (!((line[i].start.x == 0 && line[i].start.y == 0) || (line[i].end.x == 0 && line[i].end.y == 0))) {
-    //    line.push_back(line[i]);
-    //    i++;
-    //}
-    //line.erase(line.begin(), line.begin() + i);
-    //std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
-
     if (line[0].end.x == 0) 
     {
         is_clockwise = true;
@@ -225,13 +216,14 @@ void Polygon::fixOrderLines() {
     }
 #ifdef DEBUG
     std::cout << std::setw(70) << "Order of coordinates was fixed!" << std::endl;
+
     if (is_clockwise) 
     {
         std::cout << "Clockwise! No reverse needed.\n";
     }
     else
     {
-        std::cout << "Anticlockwise! Lines was reversed!\n" << "start <> end\n";
+        std::cout << "Anticlockwise! Lines was reversed!\n";
     }
 #endif // DEBUG
 }
@@ -259,10 +251,6 @@ void Polygon::deleteExtraLines() {
         idx = 0;
     }
     line.erase(line.begin() + idx);
-
-#ifdef DEBUG
-    std::cout << std::setw(70) << "Sides was deleted!" << std::endl;
-#endif // DEBUG
 }
 
 void Polygon::findOffsets() {
@@ -307,35 +295,23 @@ void Polygon::findOffsets() {
 }
 
 void Polygon::process() {
-#ifdef DEBUG
+
     calcLines();
-    //printLines();
 
     makeCoordsRelative();
-    //printLines();
 
     fixOrderLines();
-    //printLines();
 
     deleteExtraLines();
-    printLines();
 
     findOffsets();
+
+#ifdef DEBUG
+
+    printLines();
     printOffsets();
 
 #endif // DEBUG
-
-#ifndef DEBUG
-    calcLines();
-
-    makeCoordsRelative();
-
-    fixOrderLines();
-
-    deleteExtraLines();
-
-    findOffsets();
-#endif // !DEBUG
 
 }
 
@@ -356,24 +332,25 @@ void Topology::findPosOfElement(std::string strElement, std::string StrLayout) {
 
 //printing positions of element in layout
 void Topology::printPosOfElement() {
+    using namespace std;
     if (posOfElement.empty())
-        std::cout << "There is no element in layout!" << std::endl;
+        cout << "There is no element in layout!" << endl;
     else
     {
-        std::cout << "Positions of element in layout: ";
+        cout << "Positions of element in layout: ";
         for (size_t i = 0; i < posOfElement.size(); i++)
-            std::cout << posOfElement[i] << " ";
-        std::cout << std::endl;
+            cout << posOfElement[i] << " ";
+        cout << endl;
     }
 
     if (posOfReversedElement.empty())
-        std::cout << "There is no reversed element in layout!" << std::endl;
+        cout << "There is no reversed element in layout!" << endl;
     else
     {
-        std::cout << "Positions of reversed element in layout: ";
+        cout << "Positions of reversed element in layout: ";
         for (size_t i = 0; i < posOfReversedElement.size(); i++)
-            std::cout << posOfReversedElement[i] << " ";
-        std::cout << std::endl;
+            cout << posOfReversedElement[i] << " ";
+        cout << endl;
     }
 }
 
@@ -404,17 +381,17 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                           << " H: " << std::setw(5) << layout.offsetHeight[j + posOfElement[i]]
                           << " W: " << std::setw(5) << layout.offsetWidth[j + posOfElement[i]] << "\n";
 
-                //special method for 0 and last offsets
+                //special method for zero and last offsets
                 if (j == 0 || j == element.strOffsetType.size() - 1)
                 {
                     if (element.offsetHeight[j] == layout.offsetHeight[j + posOfElement[i]] &&
                         element.offsetWidth[j] <= layout.offsetWidth[j + posOfElement[i]])
                     {
-                        std::cout << std::setw(30) << "OK " << "\n";
+                        std::cout  << "TRUE " << "\n";
                     }
                     else
                     {
-                        std::cout << std::setw(30) << "WRONG " << "\n";
+                        std::cout  << "WRONG " << "\n";
                         truePosition[i] = false;
                     }
                 }
@@ -424,11 +401,11 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                     if (element.offsetHeight[j] == layout.offsetHeight[j + posOfElement[i]] &&
                         element.offsetWidth[j]  == layout.offsetWidth[j + posOfElement[i]])
                     {
-                        std::cout << std::setw(30) << "OK " << "\n";
+                        std::cout  << "TRUE " << "\n";
                     }
-                    else
+                    else 
                     {
-                        std::cout << std::setw(30) << "WRONG " << "\n";
+                        std::cout  << "WRONG " << "\n";
                         truePosition[i] = false;
                     }
                 }
@@ -454,17 +431,17 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                           << " H: " << std::setw(5) << layout.offsetHeight[j + posOfReversedElement[i]]
                           << " W: " << std::setw(5) << layout.offsetWidth[j + posOfReversedElement[i]] << "\n";
 
-                //special method for 0 and last offsets
+                //special method for zero and last offsets
                 if (j == 0 || j == element.strOffsetType.size() - 1)
                 {
                     if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + posOfReversedElement[i]] &&
                         reverseElement.offsetWidth[j] <= layout.offsetWidth[j + posOfReversedElement[i]])
                     {
-                        std::cout << std::setw(30) << "OK " << "\n";
+                        std::cout  << "TRUE " << "\n";
                     }
                     else
                     {
-                        std::cout << std::setw(30) << "WRONG " << "\n";
+                        std::cout  << "WRONG " << "\n";
                         trueReversePosition[i] = false;
                     }
                 }
@@ -474,11 +451,11 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                     if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + posOfReversedElement[i]] &&
                         reverseElement.offsetWidth[j] == layout.offsetWidth[j + posOfReversedElement[i]])
                     {
-                        std::cout << std::setw(30) << "OK " << "\n";
+                        std::cout  << "TRUE " << "\n";
                     }
                     else
                     {
-                        std::cout << std::setw(30) << "WRONG " << "\n";
+                        std::cout  << "WRONG " << "\n";
                         trueReversePosition[i] = false;
                     }
                 }
@@ -486,8 +463,6 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
             std::cout << "\n\n";
         }
     }
-
-    
 
     for (size_t i = 0; i < truePosition.size(); i++)
     {
@@ -504,4 +479,10 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
         else
             std::cout << "(REVERSED) Position " << i << " is wrong\n";
     }
+}
+
+std::vector<Point> Topology::Find(const Polygon& element, const Polygon& layout)
+{
+
+    return std::vector<Point>();
 }
