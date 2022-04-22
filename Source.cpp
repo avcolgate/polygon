@@ -1,42 +1,55 @@
 ﻿#include "poly.h"
 
 int main() {
-    const std::string fileName = "dff_coords.txt";
 
-    Polygon polygon;
+    const std::string elementFileName =     "txt/dff_coords.txt";
+    const std::string layoutFileName =       "txt/large_1.txt";
+
+    Polygon   element;
+    Polygon   layout;
+    Topology  topology;
     
-    if (polygon.readFile(fileName) == true) {
-        std::cout << "File " << fileName << " was successfully read!\n\n";
+    if (element.readFile(elementFileName))
+    {
+        std::cout << std::setw(55) << elementFileName << " was successfully read!\n";
+        element.process();
     }
     else {
-        std::cout << "ERROR in opening file!";
+        std::cout << "ERROR in opening file of element \"" << elementFileName << "\"\n";
         return EXIT_FAILURE;
     }
 
-    polygon.printLines();
-    polygon.calcLines();
-
-    polygon.MakeCoordsRelative();
-    polygon.printLines();
-
-    polygon.FixOrderLines();
-    polygon.printLines();
-
-    polygon.DeletingExtraLines();
-    polygon.printLines();
-
-    polygon.findOffsets();
-    polygon.printOffsets();
-
-    for (size_t i = 0; i < polygon.offsetType.size(); i++) {
-        std::string tempstr = (polygon.offsetType.at(i));
-        std::cout << tempstr.substr(0,1);
+    if (layout.readFile(layoutFileName)) 
+    {
+        std::cout << std::setw(55) << layoutFileName << " was successfully read!\n";
+        layout.process();
     }
-    std::cout << std::endl;
-
-    for (size_t i = 0; i < polygon.offsetType.size(); i++) {
-        std::cout << polygon.offsetHeight.at(i) << " ";
+    else {
+        std::cout << "ERROR in opening file of layout \"" << layoutFileName << "\"\n";
+        return EXIT_FAILURE;
     }
 
-    return EXIT_SUCCESS;
+    std::cout << "Element: " << element.strOffsetType << std::endl;
+    std::cout << "Layout:  " << layout.strOffsetType << std::endl << std::endl;
+
+    topology.findPosOfElement(element.strOffsetType, layout.strOffsetType);
+    
+    topology.printPosOfElement();
+
+    topology.checkOffset(element, layout);
+
+    auto checkForward =  std::find(topology.truePosition.begin(),        topology.truePosition.end(), true);
+    auto checkReverse =  std::find(topology.trueReversePosition.begin(), topology.trueReversePosition.end(), true);
+
+    if (checkForward == topology.truePosition.end() &&
+        checkReverse == topology.trueReversePosition.end())
+    {
+        std::cout << "\nNOT FOUND!!\n";
+    }
+    else
+    {
+        std::cout << "\nFOUND!!\n";
+    }
+
+    return 0;
 }

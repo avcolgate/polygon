@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <algorithm>
 
+//#define  DEBUG
+
 enum class LineOrientation {
     undefined = 0,
     vertical,
@@ -30,52 +32,55 @@ public:
     
 };
 
-//class Offset {
-//public:
-//    OffsetType offsetType;
-//    
-//    uint32_t width, height;
-//
-//    Offset() : offsetType{ OffsetType::undefined }, width { 0 }, height{ 0 } { }
-//};
-
 class Line {
 public:
-    Point        start;
-    Point        finish;
+    Point            start;
+    Point            end;
                  
-    uint32_t     length;
+    uint32_t         length;
     LineOrientation  orient;
 
 };
 
-class Polygon {
-public:
-    std::vector<Line> line;
-    //std::vector<Offset> offset;
-    std::vector<std::string>   offsetType;
-    std::vector<int32_t>      offsetHeight;
-    std::vector<int32_t>      offsetWidth;
-    bool                       WidthOnTop;
+class Polygon{
+public: 
+    std::vector<Line>          line;
+    std::string                strOffsetType;
+    std::vector<int32_t>       offsetHeight;
+    std::vector<int32_t>       offsetWidth;
+    bool                       widthOnTop;
   
-    Point min, max;
-
-    uint32_t width, height;
+    Point                      min, max;
+    uint32_t                   width, height;
 
     Polygon() :max{ std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::min() },
-        min{ std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max() },
-        width{ 0 }, height{ 0 }, WidthOnTop{ 0 } { }
+               min{ std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max() },
+               width{ 0 }, height{ 0 }, widthOnTop{ 0 } { }
 
     bool readFile(const std::string& fileName);
     void printLines();
     void printOffsets();
     void calcLines();
     void findOffsets();
-    void MakeCoordsRelative();
-    void DeletingExtraLines();
-    void FixOrderLines();
+    void makeCoordsRelative();
+    void deleteExtraLines();
+    void fixOrderLines();
+
+    void process();
 };
 
-class Layout {
-    std::vector<Polygon> polygons;
+class Topology{
+public:
+    std::vector<uint32_t> posOfElement;
+    std::vector<uint32_t> posOfReversedElement;
+
+    std::vector<bool>     truePosition;
+    std::vector<bool>     trueReversePosition;
+
+    void findPosOfElement(std::string element, std::string layout);
+    void printPosOfElement();
+
+    void checkOffset(const Polygon &element, const Polygon &layout);
+
+    std::vector<Point>Find(const Polygon& element, const Polygon& layout);
 };
