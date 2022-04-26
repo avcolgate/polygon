@@ -48,6 +48,8 @@ public:
     std::string                strOffsetType;
     std::vector<int32_t>       offsetHeight;
     std::vector<int32_t>       offsetWidth;
+    std::vector<Point>         offsetCoords;
+
     bool                       widthOnTop;
   
     Point                      min, max;
@@ -71,11 +73,13 @@ public:
 
 class Topology{
 public:
-    std::vector<uint32_t> posOfElement;
-    std::vector<uint32_t> posOfReversedElement;
-
-    std::vector<bool>     truePosition;
-    std::vector<bool>     trueReversePosition;
+    std::vector<uint32_t>      potentialPositions;
+    std::vector<uint32_t>      potentialPositionsReversed;
+                               
+    std::vector<bool>          correctPosition;
+    std::vector<bool>          correctReversePosition;
+                               
+    std::vector<Point>         correctPoints;
 
     void findPosOfElement(std::string element, std::string layout);
     void printPosOfElement();

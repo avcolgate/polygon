@@ -38,11 +38,11 @@ int main() {
 
     topology.checkOffset(element, layout);
 
-    auto checkForward =  std::find(topology.truePosition.begin(),        topology.truePosition.end(), true);
-    auto checkReverse =  std::find(topology.trueReversePosition.begin(), topology.trueReversePosition.end(), true);
+    auto checkForward =  std::find(topology.correctPosition.begin(),        topology.correctPosition.end(), true);
+    auto checkReverse =  std::find(topology.correctReversePosition.begin(), topology.correctReversePosition.end(), true);
 
-    if (checkForward == topology.truePosition.end() &&
-        checkReverse == topology.trueReversePosition.end())
+    if (checkForward == topology.correctPosition.end() &&
+        checkReverse == topology.correctReversePosition.end())
     {
         std::cout << "\nNOT FOUND!!\n";
     }
