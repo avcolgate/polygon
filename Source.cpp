@@ -3,7 +3,9 @@
 int main() {
 
     const std::string elementFileName =     "txt/dff_coords.txt";
-    const std::string layoutFileName =       "txt/large_1.txt";
+    const std::string layoutFileName =      "txt/large_1.txt";
+
+    const std::string outFileName =         "txt/out.txt";
 
     Polygon   element;
     Polygon   layout;
@@ -32,24 +34,14 @@ int main() {
     std::cout << "Element: " << element.strOffsetType << std::endl;
     std::cout << "Layout:  " << layout.strOffsetType << std::endl << std::endl;
 
-    topology.findPosOfElement(element.strOffsetType, layout.strOffsetType);
+    topology.findPositions(element.strOffsetType, layout.strOffsetType);
     
-    topology.printPosOfElement();
+    topology.printPositions();
 
-    topology.checkOffset(element, layout);
+    topology.Find(element, layout);
 
-    auto checkForward =  std::find(topology.correctPosition.begin(),        topology.correctPosition.end(), true);
-    auto checkReverse =  std::find(topology.correctReversePosition.begin(), topology.correctReversePosition.end(), true);
+    writeFile(outFileName, topology);
 
-    if (checkForward == topology.correctPosition.end() &&
-        checkReverse == topology.correctReversePosition.end())
-    {
-        std::cout << "\nNOT FOUND!!\n";
-    }
-    else
-    {
-        std::cout << "\nFOUND!!\n";
-    }
 
     return 0;
 }

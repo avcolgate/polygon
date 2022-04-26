@@ -48,6 +48,7 @@ public:
     std::string                strOffsetType;
     std::vector<int32_t>       offsetHeight;
     std::vector<int32_t>       offsetWidth;
+    std::vector<Point>         offsetRelativeCoords;
     std::vector<Point>         offsetCoords;
 
     bool                       widthOnTop;
@@ -73,18 +74,18 @@ public:
 
 class Topology{
 public:
-    std::vector<uint32_t>      potentialPositions;
-    std::vector<uint32_t>      potentialPositionsReversed;
+    std::vector<uint32_t>      potentialPositionsFW;
+    std::vector<uint32_t>      potentialPositionsRV;
                                
-    std::vector<bool>          correctPosition;
+    std::vector<bool>          boolCorrectPosition;
     std::vector<bool>          correctReversePosition;
                                
     std::vector<Point>         correctPoints;
 
-    void findPosOfElement(std::string element, std::string layout);
-    void printPosOfElement();
+    void findPositions(std::string element, std::string layout);
+    void printPositions();
 
-    void checkOffset(const Polygon &element, const Polygon &layout);
-
-    std::vector<Point>Find(const Polygon& element, const Polygon& layout);
+    void Find(const Polygon &element, const Polygon &layout);
 };
+
+bool writeFile(const std::string& fileName, const Topology& topology);

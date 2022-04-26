@@ -290,6 +290,9 @@ void Polygon::findOffsets() {
             offsetHeight.push_back(tempOffsetHeight);
             offsetWidth.push_back(tempOffsetWidth);
             strOffsetType+=strTempOffsetType;
+
+            offsetRelativeCoords.push_back({ line[i].start.x, line[i].start.y });
+            offsetCoords.push_back({ line[i].start.x + min.x, line[i].start.y + min.y });
             
         }
     }
@@ -317,61 +320,62 @@ void Polygon::process() {
 }
 
 //searching positions of element in layout
-void Topology::findPosOfElement(std::string strElement, std::string StrLayout) {
+void Topology::findPositions(std::string strElement, std::string StrLayout) {
     size_t i = 0;
 
     for (i = StrLayout.find(strElement, i++); i != std::string::npos; i = StrLayout.find(strElement, i + 1)) {
-        potentialPositions.push_back(i);
+        potentialPositionsFW.push_back(i);
     }
 
     i = 0;
     std::reverse(strElement.begin(), strElement.end());
     for (i = StrLayout.find(strElement, i++); i != std::string::npos; i = StrLayout.find(strElement, i + 1)) {
-        potentialPositionsReversed.push_back(i);
+        potentialPositionsRV.push_back(i);
     }
 }
 
 //printing positions of element in layout
-void Topology::printPosOfElement() {
+void Topology::printPositions() {
     using namespace std;
-    if (potentialPositions.empty())
+    if (potentialPositionsFW.empty())
         cout << "There is no element in layout!" << endl;
     else
     {
         cout << "Positions of element in layout: ";
-        for (size_t i = 0; i < potentialPositions.size(); i++)
-            cout << potentialPositions[i] << " ";
+        for (size_t i = 0; i < potentialPositionsFW.size(); i++)
+            cout << potentialPositionsFW[i] << " ";
         cout << endl;
     }
 
-    if (potentialPositionsReversed.empty())
+    if (potentialPositionsRV.empty())
         cout << "There is no reversed element in layout!" << endl;
     else
     {
         cout << "Positions of reversed element in layout: ";
-        for (size_t i = 0; i < potentialPositionsReversed.size(); i++)
-            cout << potentialPositionsReversed[i] << " ";
+        for (size_t i = 0; i < potentialPositionsRV.size(); i++)
+            cout << potentialPositionsRV[i] << " ";
         cout << endl;
     }
 }
 
-void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
+void Topology::Find(const Polygon &element, const Polygon &layout) {
 
-    correctReversePosition.resize(potentialPositionsReversed.size(), true);
+    correctReversePosition.resize(potentialPositionsRV.size(), true);
 
+    Point tempPoint;
     Polygon reverseElement = element;
     std::reverse(reverseElement.offsetHeight.begin(),  reverseElement.offsetHeight.end());
     std::reverse(reverseElement.offsetWidth.begin(),   reverseElement.offsetWidth.end());
     std::reverse(reverseElement.strOffsetType.begin(), reverseElement.strOffsetType.end());
 
     //////////////////////////////////////        FORWARD       //////////////////////////////////////////////
-    if (!potentialPositions.empty()) {
+    if (!potentialPositionsFW.empty()) {
         std::cout << std::setw(60) << "FORWARD ORDER\n";
     }
 
-    for (size_t i = 0; i < potentialPositions.size(); i++)
+    for (size_t i = 0; i < potentialPositionsFW.size(); i++)
     {
-        correctPosition.clear();
+        boolCorrectPosition.clear();
         for (size_t j = 0; j < element.strOffsetType.size(); j++)
         {
             std::cout << "(" << element.strOffsetType[j] << ")\n";
@@ -380,121 +384,165 @@ void Topology::checkOffset(const Polygon &element, const Polygon &layout) {
                       << " H: " << std::setw(5) << element.offsetHeight[j]
                       << " W: " << std::setw(5) << element.offsetWidth[j] << "\n";
 
-            std::cout << std::setw(8) << "layout " << std::setw(3) << j + potentialPositions[i]
-                      << " H: " << std::setw(5) << layout.offsetHeight[j + potentialPositions[i]]
-                      << " W: " << std::setw(5) << layout.offsetWidth[j + potentialPositions[i]] << "\n";
+            std::cout << std::setw(8) << "layout " << std::setw(3) << j + potentialPositionsFW[i]
+                      << " H: " << std::setw(5) << layout.offsetHeight[j + potentialPositionsFW[i]]
+                      << " W: " << std::setw(5) << layout.offsetWidth[j + potentialPositionsFW[i]] << "\n";
 
             //special method for zero and last offsets
             if (j == 0 || j == element.strOffsetType.size() - 1)
             {
-                if (element.offsetHeight[j] == layout.offsetHeight[j + potentialPositions[i]] &&
-                    element.offsetWidth[j] <= layout.offsetWidth[j + potentialPositions[i]])
+                if (element.offsetHeight[j] == layout.offsetHeight[j + potentialPositionsFW[i]] &&
+                    element.offsetWidth[j] <= layout.offsetWidth[j + potentialPositionsFW[i]])
                 {
-                    correctPosition.push_back(true);
+                    boolCorrectPosition.push_back(true);
+
+                    //adding only first point of offset
+                    if (j == 0) {
+                        //possible point to add
+                        tempPoint = { layout.offsetCoords[j + potentialPositionsFW[i]].x,
+                                      layout.offsetCoords[j + potentialPositionsFW[i]].y };
+                        //correctPoints.push_back(tempPoint);
+                    }
                 }
                 else
                 {
-                    correctPosition.push_back(false);
+                    boolCorrectPosition.push_back(false);
                     //break;
                 }
             }
-            //not first or last
+            //ordinary method for not first or last
             else
             {
-                if (element.offsetHeight[j] == layout.offsetHeight[j + potentialPositions[i]] &&
-                    element.offsetWidth[j]  == layout.offsetWidth[j + potentialPositions[i]])
+                if (element.offsetHeight[j] == layout.offsetHeight[j + potentialPositionsFW[i]] &&
+                    element.offsetWidth[j]  == layout.offsetWidth[j + potentialPositionsFW[i]])
                 {
-                    correctPosition.push_back(true);
+                    boolCorrectPosition.push_back(true);
                 }
                 else 
                 {
-                    correctPosition.push_back(false);
+                    boolCorrectPosition.push_back(false);
                     //break;
                 }
             }
         }
 
-        if (!potentialPositions.empty()) {
-            for (size_t i = 0; i < correctPosition.size(); i++)
-            {
-                if (!correctPosition[i]) {
-                    std::cout << "(" << i << ") " << "is false!\n";
+        if (!potentialPositionsFW.empty()) {
+            int numOfTrue = 0;
+
+            for (size_t i = 0; i < boolCorrectPosition.size(); i++) {
+                if (boolCorrectPosition[i])
+                {
+                    numOfTrue++;
                 }
-                else {
-                    std::cout << "(" << i << ") " << "is true!\n";
-                }
+            }
+
+            if (numOfTrue == boolCorrectPosition.size()) {
+                std::cout << "Offset is true!!!\n";
+                correctPoints.push_back(tempPoint);
+            }
+            else {
+                std::cout << "Offset is false!!!\n";
             }
             std::cout << "\n";
         }
     }
 
     ////////////////////////////////////      REVERSE     //////////////////////////
-    if (!potentialPositionsReversed.empty()) {
+    if (!potentialPositionsRV.empty()) {
         std::cout << std::setw(60) << "REVERSE ORDER\n";
     }
 
-    for (size_t i = 0; i < potentialPositionsReversed.size(); i++)
+    for (size_t i = 0; i < potentialPositionsRV.size(); i++)
     {
-        correctPosition.clear();
+        boolCorrectPosition.clear();
         for (size_t j = 0; j < reverseElement.strOffsetType.size(); j++)
         {
             std::cout << "(" << reverseElement.strOffsetType[j] << ")\n";
+
             std::cout << std::setw(8) << "element" << std::setw(3) << j
                       << " H: " << std::setw(5) << reverseElement.offsetHeight[j]
                       << " W: " << std::setw(5) << reverseElement.offsetWidth[j] << "\n";
 
-            std::cout << std::setw(8) << "layout" << std::setw(3) << j + potentialPositionsReversed[i]
-                      << " H: " << std::setw(5) << layout.offsetHeight[j + potentialPositionsReversed[i]]
-                      << " W: " << std::setw(5) << layout.offsetWidth[j + potentialPositionsReversed[i]] << "\n";
+            std::cout << std::setw(8) << "layout" << std::setw(3) << j + potentialPositionsRV[i]
+                      << " H: " << std::setw(5) << layout.offsetHeight[j + potentialPositionsRV[i]]
+                      << " W: " << std::setw(5) << layout.offsetWidth[j + potentialPositionsRV[i]] << "\n";
 
             //special method for zero and last offsets
             if (j == 0 || j == element.strOffsetType.size() - 1)
             {
-                if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + potentialPositionsReversed[i]] &&
-                    reverseElement.offsetWidth[j] <= layout.offsetWidth[j + potentialPositionsReversed[i]])
+                if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + potentialPositionsRV[i]] &&
+                    reverseElement.offsetWidth[j] <= layout.offsetWidth[j + potentialPositionsRV[i]])
                 {
-                    correctPosition.push_back(true);
+                    boolCorrectPosition.push_back(true);
+
+                    //adding only first point of offset
+                    if (j == 0) {
+                        tempPoint = { layout.offsetCoords[j + potentialPositionsRV[i]].x,
+                                      layout.offsetCoords[j + potentialPositionsRV[i]].y };
+                        //correctPoints.push_back(tempPoint);
+                    }
                 }
                 else
                 {
-                    correctPosition.push_back(false);
+                    boolCorrectPosition.push_back(false);
                     //break;
                 }
             }
-            //not first or last
+            //ordinary method for not first or last
             else
             {
-                if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + potentialPositionsReversed[i]] &&
-                    reverseElement.offsetWidth[j] == layout.offsetWidth[j + potentialPositionsReversed[i]])
+                if (reverseElement.offsetHeight[j] == layout.offsetHeight[j + potentialPositionsRV[i]] &&
+                    reverseElement.offsetWidth[j] == layout.offsetWidth[j + potentialPositionsRV[i]])
                 {
-                    correctPosition.push_back(true);
+                    boolCorrectPosition.push_back(true);
                 }
                 else
                 {
-                    correctPosition.push_back(false);
+                    boolCorrectPosition.push_back(false);
                     //break;
                 }
             }
         }
-        std::cout << "\n\n";
-    }
+        if (!potentialPositionsRV.empty()) {
+            int numOfTrue = 0;
 
-    if (!potentialPositionsReversed.empty()) {
-        for (size_t i = 0; i < correctPosition.size(); i++)
-        {
-            if (!correctPosition[i]) {
-                std::cout << "(" << i << ") " << "is false!\n";
+            for (size_t i = 0; i < boolCorrectPosition.size(); i++) {
+                if (boolCorrectPosition[i])
+                {
+                    numOfTrue++;
+                }
+            }
+
+            if (numOfTrue == boolCorrectPosition.size()) {
+                std::cout << "Offset is true!!!\n";
+                correctPoints.push_back(tempPoint);
             }
             else {
-                std::cout << "(" << i << ") " << "is true!\n";
+                std::cout << "Offset is false!!!\n";
             }
+            std::cout << "\n";
         }
-        std::cout << "\n";
     }
 }
 
-std::vector<Point> Topology::Find(const Polygon& element, const Polygon& layout)
+bool writeFile(const std::string& fileName, const Topology& topology)
 {
+    using namespace std;
 
-    return std::vector<Point>();
+    ofstream file;
+    file.open(fileName);
+
+    if (!file)
+        return false;
+
+    for (size_t i = 0; i < topology.correctPoints.size(); i++)
+    {
+        
+        file << topology.correctPoints[i].x << " " << topology.correctPoints[i].y << endl;
+
+        cout << topology.correctPoints[i].x << " " << topology.correctPoints[i].y << endl;
+    }
+
+    file.close();
+    return true;
 }
