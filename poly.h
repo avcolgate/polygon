@@ -40,6 +40,8 @@ public:
     uint32_t         length;
     LineOrientation  orient;
 
+    Line() : length{ 0 }, orient{ LineOrientation::undefined } { }
+
 };
 
 class Polygon{
@@ -49,7 +51,7 @@ public:
     std::vector<int32_t>       offsetHeight;
     std::vector<int32_t>       offsetWidth;
     std::vector<Point>         offsetRelativeCoords;
-    std::vector<Point>         offsetCoords;
+    std::vector<Line>          offsetCoords;
 
     bool                       widthOnTop;
   

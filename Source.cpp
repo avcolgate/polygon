@@ -42,6 +42,5 @@ int main() {
 
     writeFile(outFileName, topology);
 
-
     return 0;
 }

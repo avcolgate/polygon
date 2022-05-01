@@ -21,8 +21,7 @@ std::string eOffsetTypeToStr(const OffsetType& type) {
 
 bool Polygon::readFile(const std::string& fileName) {
 
-    std::ifstream file;
-    file.open(fileName);
+    std::ifstream file(fileName);
     Line tempLine;
     uint32_t tempLen;
 
@@ -291,8 +290,13 @@ void Polygon::findOffsets() {
             offsetWidth.push_back(tempOffsetWidth);
             strOffsetType+=strTempOffsetType;
 
-            offsetRelativeCoords.push_back({ line[i].start.x, line[i].start.y });
-            offsetCoords.push_back({ line[i].start.x + min.x, line[i].start.y + min.y });
+            //adding start and end
+            Line tempLine;
+            tempLine.start = { line[i].start.x + min.x, line[i].start.y + min.y };
+            tempLine.end =   { line[i].end.x + min.x,   line[i].end.y + min.y };
+
+            //offsetRelativeCoords.push_back({ line[i].start.x, line[i].start.y });
+            offsetCoords.push_back(tempLine);
             
         }
     }
@@ -362,7 +366,15 @@ void Topology::Find(const Polygon &element, const Polygon &layout) {
 
     correctReversePosition.resize(potentialPositionsRV.size(), true);
 
-    Point tempPoint;
+    Point tempLayoutOffsetStart;
+    Point tempLayoutOffsetEnd; 
+    
+    int32_t elemDeltaXstart = 0;
+    int32_t elemDeltaYstart = 0;
+
+    int32_t elemDeltaXend = 0;
+    int32_t elemDeltaYend = 0;
+
     Polygon reverseElement = element;
     std::reverse(reverseElement.offsetHeight.begin(),  reverseElement.offsetHeight.end());
     std::reverse(reverseElement.offsetWidth.begin(),   reverseElement.offsetWidth.end());
@@ -388,21 +400,51 @@ void Topology::Find(const Polygon &element, const Polygon &layout) {
                       << " H: " << std::setw(5) << layout.offsetHeight[j + potentialPositionsFW[i]]
                       << " W: " << std::setw(5) << layout.offsetWidth[j + potentialPositionsFW[i]] << "\n";
 
-            //special method for zero and last offsets
+            //special method for zero and last offsets of ELEMENT
             if (j == 0 || j == element.strOffsetType.size() - 1)
             {
                 if (element.offsetHeight[j] == layout.offsetHeight[j + potentialPositionsFW[i]] &&
-                    element.offsetWidth[j] <= layout.offsetWidth[j + potentialPositionsFW[i]])
+                    element.offsetWidth[j]  <= layout.offsetWidth [j + potentialPositionsFW[i]])
                 {
+                    //std::cout << j + potentialPositionsFW[i] << std::endl;
                     boolCorrectPosition.push_back(true);
 
-                    //adding only first point of offset
-                    if (j == 0) {
-                        //possible point to add
-                        tempPoint = { layout.offsetCoords[j + potentialPositionsFW[i]].x,
-                                      layout.offsetCoords[j + potentialPositionsFW[i]].y };
-                        //correctPoints.push_back(tempPoint);
+                    //calculating element deltas
+                    // 
+                    //first offset in element
+                    if (j == 0)
+                    {
+                        elemDeltaXstart = element.offsetWidth[j];        //for addition to X coord 
+                        elemDeltaYstart = element.offsetHeight[j + 1];   //for addition to Y coord (abs)
+
+                        //picking the next offset in layout
+                        tempLayoutOffsetStart = { layout.offsetCoords[ (j + 1) + potentialPositionsFW[i]].start.x + elemDeltaXstart,
+                                                  layout.offsetCoords[ (j + 1) + potentialPositionsFW[i]].start.y + abs(elemDeltaYstart) };
+
+                        std::cout << "elem delta X start: "        << elemDeltaXstart << std::endl;
+                        std::cout << "elem delta Y start (next): " << elemDeltaYstart << std::endl;
+
+                        std::cout << "tempLayoutOffsetStart x: " << tempLayoutOffsetStart.x << std::endl;
+                        std::cout << "tempLayoutOffsetStart y: " << tempLayoutOffsetStart.y << std::endl;
                     }
+
+                    //last offset in element
+                    if (j == element.strOffsetType.size() - 1)
+                    {
+                        elemDeltaXend = element.offsetWidth[j];         //for subtract from X coord
+                        elemDeltaYend = element.offsetHeight[j - 1];    //for subtract from Y coord (abs)
+
+                        //picking the previous offset in layout
+                        tempLayoutOffsetEnd = { layout.offsetCoords[ (j - 1) + potentialPositionsFW[i]].end.x - elemDeltaXend,
+                                                layout.offsetCoords[ (j - 1) + potentialPositionsFW[i]].end.y - abs(elemDeltaYend)};
+
+                        std::cout << "elem delta X end: "        << elemDeltaXend << std::endl;
+                        std::cout << "elem delta Y end (prev): " << elemDeltaYend << std::endl;
+
+                        std::cout << "tempLayoutOffsetEnd x: " << tempLayoutOffsetEnd.x << std::endl;
+                        std::cout << "tempLayoutOffsetEnd y: " << tempLayoutOffsetEnd.y << std::endl;
+                    }
+
                 }
                 else
                 {
@@ -414,9 +456,22 @@ void Topology::Find(const Polygon &element, const Polygon &layout) {
             else
             {
                 if (element.offsetHeight[j] == layout.offsetHeight[j + potentialPositionsFW[i]] &&
-                    element.offsetWidth[j]  == layout.offsetWidth[j + potentialPositionsFW[i]])
+                    element.offsetWidth[j]  == layout.offsetWidth [j + potentialPositionsFW[i]])
                 {
                     boolCorrectPosition.push_back(true);
+                    //if (j == 1)
+                    //{
+                    //    
+                    //                                                                                   
+                    //    std::cout << j + potentialPositionsFW[i] << std::endl;
+                    //}
+                    //
+                    //if (j == element.strOffsetType.size() - 2)
+                    //{
+                    //    
+                    //
+                    //    std::cout << j + potentialPositionsFW[i] << std::endl;
+                    //}
                 }
                 else 
                 {
@@ -438,7 +493,8 @@ void Topology::Find(const Polygon &element, const Polygon &layout) {
 
             if (numOfTrue == boolCorrectPosition.size()) {
                 std::cout << "Offset is true!!!\n";
-                correctPoints.push_back(tempPoint);
+                correctPoints.push_back(tempLayoutOffsetStart);
+                correctPoints.push_back(tempLayoutOffsetEnd);
             }
             else {
                 std::cout << "Offset is false!!!\n";
@@ -477,9 +533,8 @@ void Topology::Find(const Polygon &element, const Polygon &layout) {
 
                     //adding only first point of offset
                     if (j == 0) {
-                        tempPoint = { layout.offsetCoords[j + potentialPositionsRV[i]].x,
-                                      layout.offsetCoords[j + potentialPositionsRV[i]].y };
-                        //correctPoints.push_back(tempPoint);
+                        //tempLayoutOffsetStart = { layout.offsetCoords[j + potentialPositionsRV[i]].x,
+                        //             layout.offsetCoords[j + potentialPositionsRV[i]].y };
                     }
                 }
                 else
@@ -515,7 +570,7 @@ void Topology::Find(const Polygon &element, const Polygon &layout) {
 
             if (numOfTrue == boolCorrectPosition.size()) {
                 std::cout << "Offset is true!!!\n";
-                correctPoints.push_back(tempPoint);
+                correctPoints.push_back(tempLayoutOffsetStart);
             }
             else {
                 std::cout << "Offset is false!!!\n";
@@ -529,18 +584,24 @@ bool writeFile(const std::string& fileName, const Topology& topology)
 {
     using namespace std;
 
-    ofstream file;
-    file.open(fileName);
+    ofstream file(fileName);
 
     if (!file)
-        return false;
+        return EXIT_FAILURE;
 
     for (size_t i = 0; i < topology.correctPoints.size(); i++)
     {
-        
-        file << topology.correctPoints[i].x << " " << topology.correctPoints[i].y << endl;
+        file << topology.correctPoints[i].x << " " << topology.correctPoints[i].y;
 
-        cout << topology.correctPoints[i].x << " " << topology.correctPoints[i].y << endl;
+        cout << topology.correctPoints[i].x << " " << topology.correctPoints[i].y;
+        if (i % 4) {
+            std::cout << "\n";
+            file << "\n";
+        }
+        else {
+            std::cout << " ";
+            file << " ";
+        }
     }
 
     file.close();
